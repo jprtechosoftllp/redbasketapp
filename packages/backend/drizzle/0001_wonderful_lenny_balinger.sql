@@ -1,1 +1,0 @@
-ALTER TABLE "subcategories" ADD COLUMN "categoryName" varchar NOT NULL;

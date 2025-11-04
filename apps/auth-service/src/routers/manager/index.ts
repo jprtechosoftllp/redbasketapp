@@ -1,8 +1,8 @@
-import express from 'express';
+import express, { Router } from 'express';
 import { createManager, forgotPasseord, getManager, login, sendOTpEmailManager } from '../../controllers/manager';
 import { isAuthenticatedAdmin, isAuthenticatedManager } from '@packages/backend/middlewares/auth';
 
-const managerRouter = express.Router();
+const managerRouter:Router = express.Router();
 
 managerRouter.post('/login', login);
 managerRouter.post('/forgot-password', forgotPasseord);

@@ -125,20 +125,19 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
 export const userLoginOTP = async (req: Request, res: Response, next: NextFunction) => {
     try {
         
-        
         loginValidation(req.body);
+        
         const { phone, otp } = req.body;
         verifyOTPPhone(Number(phone), otp, next);
-        const checkUsers = await postgresDB.select({ phone }).from(usersSchema).where(eq(usersSchema.phone, phone)).limit(1);
+        
+        const checkUsers = await postgresDB.select().from(usersSchema).where(eq(usersSchema.phone, phone)).limit(1);
 
         const checkUser = checkUsers[0];
-
         if (!checkUser) {
             await postgresDB.insert(usersSchema).values({
                 phone
             });
         }
-
         const users = await postgresDB.select().from(usersSchema).where(eq(usersSchema.phone, phone)).limit(1);
 
         const user = users[0]

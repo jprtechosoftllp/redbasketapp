@@ -1,5 +1,5 @@
 {
-  "id": "ee195c28-fc08-49e9-80b8-c88e297e83db",
+  "id": "d386becc-9b3a-4e82-ae38-3ad053a45399",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -550,6 +550,12 @@
         "categoryId": {
           "name": "categoryId",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "categoryName": {
+          "name": "categoryName",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },

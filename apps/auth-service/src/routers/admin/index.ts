@@ -1,8 +1,8 @@
-import express from "express";
+import express, { Router } from "express";
 import { forgotPasseord, getAdmin, login, refreshTokenAdmin, register, sendOTpEmail } from "../../controllers/admin";
 import { isAuthenticatedAdmin } from "@packages/backend/middlewares/auth";
 
-const adminRouter = express.Router();
+const adminRouter:Router = express.Router();
 
 adminRouter.post('/sign-up', register);
 adminRouter.post('/send-otp', sendOTpEmail);

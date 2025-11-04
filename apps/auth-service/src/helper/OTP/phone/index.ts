@@ -37,15 +37,12 @@ export const senNumberdOTPPhone = async (phone: Number, next: NextFunction) => {
         const otp = crypto.randomInt(1000, 9999).toString();
         const formattedPhone = '+91' + phone.toString();
 
-        console.log(formattedPhone);
-        
         await redis.set(`otp_cooldown:${phone}`, "true", "EX", 60) // otp send agian after one minute
 
         // await redis.set(`otp_cooldown:${phone}`, "true", "EX", 60) // otp send agian after one minute
         // Your AccountSID and Auth Token from console.twilio.com
         const accountSid = process.env.TWILIO_ACCOUNT_SID!;
         const authToken = process.env.TWILIO_ACCOUNT_AUTH_TOKEN!;
-        console.log("pass2");
 
         const client = twilio(accountSid, authToken);
 
@@ -56,9 +53,6 @@ export const senNumberdOTPPhone = async (phone: Number, next: NextFunction) => {
                 from: process.env.TWILIO_PHONE_NUMBER!, // From a valid Twilio number
             })
             .then((message: any) => console.log(message.sid));
-
-            console.log("pass3");
-            
 
         await redis.set(`otp:${phone}`, otp, "EX", 300);  // otp valid for 5 minutes
 

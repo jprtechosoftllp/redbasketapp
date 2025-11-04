@@ -20,17 +20,20 @@ const app = express();
 // CORS configuration
 const allowedOrigins = isProduction
   ? [
-      'https://meatonew-backend-vendor-ui.vercel.app',
-      'https://meatonew-backend-admin-ui.vercel.app',
-      'https://meatonew-backend-manager-ui.vercel.app',
-      'https://meatonew-backend.vercel.app',
-    ]
+    'https://meatonew-backend-vendor-ui.vercel.app',
+    'https://meatonew-backend-admin-ui.vercel.app',
+    'https://meatonew-backend-manager-ui.vercel.app',
+    'https://meatonew-backend.vercel.app',
+  ]
   : [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://localhost:3003',
-    ];
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'http://localhost:8085',
+    'http://localhost:8086',
+    'http://localhost:8087'
+  ];
 
 app.use(
   cors({

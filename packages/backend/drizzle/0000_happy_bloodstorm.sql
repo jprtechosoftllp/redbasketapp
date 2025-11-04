@@ -78,6 +78,7 @@ CREATE TABLE "reviews" (
 CREATE TABLE "subcategories" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "subcategories_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"categoryId" integer NOT NULL,
+	"categoryName" varchar NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"description" text,
 	"isActive" boolean DEFAULT true,

@@ -1,12 +1,14 @@
 import { defineConfig } from 'drizzle-kit';
+import dotenv from 'dotenv'
+dotenv.config()
 
 export default defineConfig({
   schema: './packages/backend/schema/*',
   out: './packages/backend/drizzle',
   dialect: 'postgresql',
-  dbCredentials: {
-    url: process.env.DATABASE_URL!
-  }
+ dbCredentials: {
+  url: process.env.DATABASE_URL!
+}
   // dbCredentials: {
   //   host: process.env.POSTGRES_HOST || 'localhost',
   //   port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
