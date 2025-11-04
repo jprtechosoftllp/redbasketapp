@@ -1,0 +1,73 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    // "paths": {
+    //   // "@/*": [
+    //   //   "./src/*"
+    //   // ]
+    // },
+    "types": [
+      "jest",
+      "node"
+    ],
+    "outDir": "dist/user-ui",
+    "rootDir": "../../",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+  },
+  "include": [
+    "../../apps/user-ui/.next/types/**/*.ts",
+    "../../dist/apps/user-ui/.next/types/**/*.ts",
+      "../../packages/frontend/ui/src/**/*.js",
+    "../../packages/frontend/ui/src/**/*.jsx",
+    "../../packages/frontend/ui/src/**/*.ts",
+    "../../packages/frontend/ui/src/**/*.tsx",
+    "../../packages/frontend/utils/src/**/*.ts",
+    "../../packages/frontend/utils/src/**/*.tsx",
+    "../../packages/frontend/utils/src/**/*.js",
+    "../../packages/frontend/utils/src/**/*.jsx",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+  ],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "node_modules",
+    "jest.config.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    ".next"
+  ],
+  "references": [
+    {
+      "path": "../../packages/frontend/utils"
+    },
+    {
+      "path": "../../packages/frontend/ui"
+    }
+  ]
+}

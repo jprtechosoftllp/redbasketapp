@@ -1,0 +1,4 @@
+pacakges:
+  - apps/*
+  - pacakges/backend/*
+  - pacakges/frontend/*

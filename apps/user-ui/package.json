@@ -1,0 +1,22 @@
+{
+  "name": "@meato/user-ui",
+  "projectType": "application",
+  "sourceRoot": "apps/user-ui/src",
+  "build": {
+    "executor": "@nrwl/next:build",
+    "outputs": [
+      "{options.outputPath}"
+    ],
+    "options": {
+      "outputPath": "dist/apps/user-ui",
+      "root": "apps/user-ui",
+      "nextConfig": "apps/user-ui/next.config.js"
+    }
+  },
+  "serve": {
+    "executor": "@nrwl/next:server",
+    "options": {
+      "buildTarget": "user-ui:build"
+    }
+  }
+}

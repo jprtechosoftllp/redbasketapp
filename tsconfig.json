@@ -1,0 +1,55 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/auth-service-e2e"
+    },
+    {
+      "path": "./apps/auth-service"
+    },
+    {
+      "path": "./apps/api-gateway-e2e"
+    },
+    {
+      "path": "./apps/api-gateway"
+    },
+    {
+      "path": "./apps/admin-ui"
+    },
+    {
+      "path": "./packages/frontend/ui"
+    },
+    {
+      "path": "./packages/frontend/utils"
+    },
+    {
+      "path": "./apps/admin-service-e2e"
+    },
+    {
+      "path": "./apps/admin-service"
+    },
+    {
+      "path": "./apps/manager-ui"
+    },
+    {
+      "path": "./apps/vendor-ui"
+    },
+    {
+      "path": "./apps/manager-service-e2e"
+    },
+    {
+      "path": "./apps/manager-service"
+    },
+    {
+      "path": "./apps/user-ui"
+    },
+    {
+      "path": "./apps/product-service-e2e"
+    },
+    {
+      "path": "./apps/product-service"
+    }
+  ]
+}

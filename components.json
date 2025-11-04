@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": false,
+  "tailwind": {
+    "config": "packages/frontend/utils/src/tailwind.config.ts",
+    "css": "packages/frontend/utils/src/global.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "aliases": {
+    "ui": "@meato/packages/frontend/ui",
+    "components": "@meato/packages/frontend/ui/components",
+    "utils": "@meato/packages/frontend/utils",
+    "hooks": "@meato/packages/frontend/ui/hooks"
+  }
+}

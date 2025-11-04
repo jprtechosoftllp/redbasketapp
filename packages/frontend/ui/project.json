@@ -1,0 +1,15 @@
+{
+  "name": "frontend/ui",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/frontend/ui/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "add-component": {
+      "executor": "@nx-extend/shadcn-ui:add"
+    }
+  },
+  "dependencies": {
+    "react-hook-form": "^7.65.0"
+  }
+}

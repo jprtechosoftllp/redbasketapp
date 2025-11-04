@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022",
+    "customConditions": ["@meato/source"],
+    "baseUrl": ".",
+    "paths": {
+      "@meato/packages/frontend/ui": ["packages/frontend/ui/src"],
+      "@meato/packages/frontend/ui/*": ["packages/frontend/ui/src/*"],
+      "@meato/packages/frontend/utils": ["packages/frontend/utils/src"],
+      "@meato/packages/frontend/utils/*": ["packages/frontend/utils/src/*"],
+      "@packages/backend/*": ["packages/backend/*"]
+    }
+  }
+}

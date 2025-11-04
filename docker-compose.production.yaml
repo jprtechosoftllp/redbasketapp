@@ -1,0 +1,246 @@
+
+services:
+  # ---------- API GATEWAY ----------
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    image: durvesh502/meato-api-gateway:latest
+    container_name: api-gateway
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    expose:
+      - "8080"
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    networks:
+      - meato_net
+
+  # ---------- Auth Serivce ----------
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/auth-service/Dockerfile
+    image: durvesh502/meato-auth-service:latest
+    container_name: auth-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    expose:
+      - "8081"
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    networks:
+      - meato_net
+
+  # ---------- Product Serivce ----------
+  product-service:
+    build:
+      context: .
+      dockerfile: apps/product-service/Dockerfile
+    image: durvesh502/meato-product-service:latest
+    container_name: product-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    expose:
+      - "8082"
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    networks:
+      - meato_net
+
+  # ---------- Admin Serivce ----------
+  admin-service:
+    build:
+      context: .
+      dockerfile: apps/admin-service/Dockerfile
+    image: durvesh502/meato-admin-service:latest
+    container_name: admin-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    expose:
+      - "8083"
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    networks:
+      - meato_net
+  
+  # ---------- Manager Serivce ----------
+  manager-service:
+    build:
+      context: .
+      dockerfile: apps/manager-service/Dockerfile
+    image: durvesh502/meato-manager-service:latest
+    container_name: manager-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    expose:
+      - "8084"
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    networks:
+      - meato_net
+
+  # ---------- USER UI ----------
+  user-ui:
+    build:
+      context: .
+      dockerfile: apps/user-ui/Dockerfile
+    image: durvesh502/meato-user-ui:latest
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.com
+    container_name: user-ui
+    restart: unless-stopped
+    expose:
+      - "3000"
+    networks:
+      - meato_net
+
+  # ---------- VENDOR UI ----------
+  vendor-ui:
+    build:
+      context: .
+      dockerfile: apps/vendor-ui/Dockerfile
+    image: durvesh502/meato-vendor-ui:latest
+    container_name: vendor-ui
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.com
+    restart: unless-stopped
+    expose:
+      - "3003"
+    networks:
+      - meato_net
+
+  # ---------- MANAGER UI ----------
+  manager-ui:
+    build:
+      context: .
+      dockerfile: apps/manager-ui/Dockerfile
+    image: durvesh502/meato-manager-ui:latest
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.com
+    container_name: manager-ui
+    restart: unless-stopped
+    expose:
+      - "3002"
+    networks:
+      - meato_net
+
+  # ---------- ADMIN UI ----------
+  admin-ui:
+    build:
+      context: .
+      dockerfile: apps/admin-ui/Dockerfile
+    image: durvesh502/meato-admin-ui:latest
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.com
+    container_name: admin-ui
+    restart: unless-stopped
+    expose:
+      - "3001"
+    networks:
+      - meato_net
+
+  # ---------- POSTGRESQL ----------
+  db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: meato_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - meato_net
+
+  # ---------- NGINX REVERSE PROXY ----------
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/ssl/private:ro  # optional SSL certs
+    depends_on:
+      - api-gateway
+      - user-ui
+      - vendor-ui
+      - manager-ui
+      - admin-ui
+    networks:
+      - meato_net
+
+# ---------- NETWORKS & VOLUMES ----------
+networks:
+  meato_net:
+    driver: bridge
+
+volumes:
+  db_data:
