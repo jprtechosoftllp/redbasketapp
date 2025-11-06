@@ -6,8 +6,8 @@ on:
     branches: [main]
   
   workflow_dispatch:
-    inputs:
-     force_rebuild:
+  inputs:
+    force_rebuild:
       description: "Force rebuild all services"
       required: false
       default: 'false'
