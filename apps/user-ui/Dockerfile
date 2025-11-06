@@ -54,7 +54,7 @@ COPY --from=builder /app/apps/user-ui/.next ./apps/user-ui/.next
 COPY --from=builder /app/apps/user-ui/public ./apps/user-ui/public
 COPY --from=builder /app/apps/user-ui/package.json ./apps/user-ui/package.json
 
-EXPOSE 3002
+EXPOSE 3000
 
 USER node
 

@@ -54,7 +54,7 @@ COPY --from=builder /app/apps/vendor-ui/.next ./apps/vendor-ui/.next
 COPY --from=builder /app/apps/vendor-ui/public ./apps/vendor-ui/public
 COPY --from=builder /app/apps/vendor-ui/package.json ./apps/vendor-ui/package.json
 
-EXPOSE 3002
+EXPOSE 3003
 
 USER node
 

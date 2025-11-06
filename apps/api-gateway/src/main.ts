@@ -72,58 +72,58 @@ app.get('/gateway-health', (req, res) => {
 app.post('/upload-image', createImage);
 app.delete('/delete-image', removeImage)
 
-app.use('/auth', proxy('http://localhost:8081')); // Proxy all requests to the URL
-app.use('/product', proxy('http://localhost:8082')); // Proxy all requests to the URL
-app.use('/admin', proxy('http://localhost:8083')); // Proxy all requests to the URL
-app.use('/manager', proxy('http://localhost:8084')); // Proxy all requests to the URL
+// app.use('/auth', proxy('http://localhost:8081')); // Proxy all requests to the URL
+// app.use('/product', proxy('http://localhost:8082')); // Proxy all requests to the URL
+// app.use('/admin', proxy('http://localhost:8083')); // Proxy all requests to the URL
+// app.use('/manager', proxy('http://localhost:8084')); // Proxy all requests to the URL
 
 
-// // Service URL resolver
-// const getServiceUrl = (serviceName: string, port: number) => {
-//   return isProduction
-//     ? `http://${serviceName}:${port}`
-//     : `http://localhost:${port}`;
-// };
+// Service URL resolver
+const getServiceUrl = (serviceName: string, port: number) => {
+  return isProduction
+    ? `http://${serviceName}:${port}`
+    : `http://localhost:${port}`;
+};
 
-// // Proxy middleware factory
-// const createProxyMiddleware = (serviceUrl: string, serviceName: string) => {
-//   return proxy(serviceUrl, {
-//     timeout: 30000,
-//     proxyReqOptDecorator: (proxyReqOpts, req) => {
-//       proxyReqOpts.headers['x-Forwarded-For'] = req.ip;
-//       proxyReqOpts.headers['x-Original-Host'] = req.get('host');
-//       return proxyReqOpts;
-//     },
-//     proxyErrorHandler: (err, res, next) => {
-//       console.error(`Proxy error for ${serviceName}:`, err.message);
-//       if (!res.headersSent) {
-//         res.status(503).json({
-//           error: 'Service temporarily unavailable',
-//           service: serviceName,
-//           timestamp: new Date().toISOString(),
-//         });
-//       }
-//     },
-//   });
-// };
+// Proxy middleware factory
+const createProxyMiddleware = (serviceUrl: string, serviceName: string) => {
+  return proxy(serviceUrl, {
+    timeout: 30000,
+    proxyReqOptDecorator: (proxyReqOpts, req) => {
+      proxyReqOpts.headers['x-Forwarded-For'] = req.ip;
+      proxyReqOpts.headers['x-Original-Host'] = req.get('host');
+      return proxyReqOpts;
+    },
+    proxyErrorHandler: (err, res, next) => {
+      console.error(`Proxy error for ${serviceName}:`, err.message);
+      if (!res.headersSent) {
+        res.status(503).json({
+          error: 'Service temporarily unavailable',
+          service: serviceName,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    },
+  });
+};
 
-// // Proxy routes
-// app.use('/admin', createProxyMiddleware(getServiceUrl('admin-service', 8083), 'admin-service'));
-// app.use('/product', createProxyMiddleware(getServiceUrl('product-service', 8082), '/'));
-// app.use('/manager', createProxyMiddleware(getServiceUrl('manager-service', 8084), 'manager-service'));
-// // app.use('/vendor', createProxyMiddleware(getServiceUrl('vendor-service', 8085), 'vendor-service'));
-// app.use('/auth', createProxyMiddleware(getServiceUrl('auth-service', 8081), 'auth-service'));
+// Proxy routes
+app.use('/admin', createProxyMiddleware(getServiceUrl('admin-service', 8083), 'admin-service'));
+app.use('/product', createProxyMiddleware(getServiceUrl('product-service', 8082), '/product-service'));
+app.use('/manager', createProxyMiddleware(getServiceUrl('manager-service', 8084), 'manager-service'));
+// app.use('/vendor', createProxyMiddleware(getServiceUrl('vendor-service', 8085), 'vendor-service'));
+app.use('/auth', createProxyMiddleware(getServiceUrl('auth-service', 8081), 'auth-service'));
 
-// // Global error handler
-// app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-//   console.error('Global error handler:', err);
-//   if (!res.headersSent) {
-//     res.status(500).json({
-//       error: isProduction ? 'Internal server error' : err.message,
-//       timestamp: new Date().toISOString(),
-//     });
-//   }
-// });
+// Global error handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Global error handler:', err);
+  if (!res.headersSent) {
+    res.status(500).json({
+      error: isProduction ? 'Internal server error' : err.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
 
 // 404 handler
 app.use('*', (req, res) => {

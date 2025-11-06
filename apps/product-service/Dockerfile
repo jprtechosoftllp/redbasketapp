@@ -19,11 +19,11 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN pnpm install --prod
 
 # Ensure drizzle-kit is available
-# RUN pnpm add -D drizzle-kit
+RUN pnpm add -D drizzle-kit
 
 # Generate and apply Drizzle migrations
-# RUN npx drizzle-kit generate --config=drizzle.config.ts
-# RUN npx drizzle-kit push --config=drizzle.config.ts
+RUN npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
+RUN npx drizzle-kit push --config=drizzle.config.ts || echo "Skipping migration push"
 
 # Copy build application
 COPY apps/product-service/dist ./dist

@@ -22,12 +22,13 @@ RUN pnpm install --prod --prefer-frozen-lockfile
 RUN pnpm add cookie-parser tslib express
 
 
-# # Ensure drizzle-kit is available
-# RUN pnpm add -D drizzle-kit
+# Ensure drizzle-kit is available
+pnpm add drizzle-orm pg dotenv
+pnpm add -D drizzle-kit tsx @types/pg
 
-# # Generate and apply Drizzle migrations
-# RUN npx drizzle-kit generate --config=drizzle.config.ts
-# RUN npx drizzle-kit push --config=drizzle.config.ts
+# Generate and apply Drizzle migrations
+RUN npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
+RUN npx drizzle-kit push --config=drizzle.config.ts || echo "Skipping migration push"
 
 # Copy build application
 COPY apps/auth-service/dist ./dist

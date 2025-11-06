@@ -51,7 +51,7 @@ check_service() {
 
 build_image() {
   echo -e "${BLUE}🚀 Building image for ${SERVICE_NAME}...${NC}"
-  local image_name="durvesh502/meato-${SERVICE_NAME}"
+  local image_name="redbasketapp/${SERVICE_NAME}"
   local dockerfile="apps/${SERVICE_NAME}/Dockerfile"
 
   docker build -t "${image_name}:latest" -f "${dockerfile}" .
@@ -68,7 +68,7 @@ build_image() {
 run_container() {
   echo -e "${BLUE}🏃 Starting container for ${SERVICE_NAME}...${NC}"
   local port="${SERVICES[$SERVICE_NAME]}"
-  local image_name="durvesh502/meato-${SERVICE_NAME}"
+  local image_name="redbasketapp/${SERVICE_NAME}"
   local container_name="${SERVICE_NAME}-container"
 
   docker rm -f "${container_name}" 2>/dev/null || true
@@ -90,7 +90,7 @@ show_logs() {
 }
 
 clean_docker() {
-  local image_name="durvesh502/meato-${SERVICE_NAME}"
+  local image_name="redbasketapp/${SERVICE_NAME}"
   local container_name="${SERVICE_NAME}-container"
   echo -e "${YELLOW}🧹 Cleaning up ${SERVICE_NAME}...${NC}"
   docker rm -f "${container_name}" 2>/dev/null || true
@@ -147,3 +147,5 @@ case "$ACTION" in
 esac
 
 #  npm run docker:prod -- --service api-gateway
+#  docker push redbasketapp/product-service:latest -f apps/product-service/Dockerfile .
+#  docker build -t redbasketapp/vendor-ui:latest -f apps/vendor-ui/Dockerfile .

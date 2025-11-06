@@ -12,8 +12,8 @@ services:
       - NODE_ENV=production
     expose:
       - "8080"
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -24,8 +24,6 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
-    networks:
-      - meato_net
 
   # ---------- Auth Serivce ----------
   auth-service:
@@ -39,8 +37,8 @@ services:
       - NODE_ENV=production
     expose:
       - "8081"
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
       interval: 30s
@@ -51,8 +49,6 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
-    networks:
-      - meato_net
 
   # ---------- Product Serivce ----------
   product-service:
@@ -66,8 +62,8 @@ services:
       - NODE_ENV=production
     expose:
       - "8082"
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
       interval: 30s
@@ -78,8 +74,6 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
-    networks:
-      - meato_net
 
   # ---------- Admin Serivce ----------
   admin-service:
@@ -93,8 +87,8 @@ services:
       - NODE_ENV=production
     expose:
       - "8083"
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
       interval: 30s
@@ -105,8 +99,6 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
-    networks:
-      - meato_net
   
   # ---------- Manager Serivce ----------
   manager-service:
@@ -120,8 +112,8 @@ services:
       - NODE_ENV=production
     expose:
       - "8084"
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8084/health"]
       interval: 30s
@@ -132,8 +124,6 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
-    networks:
-      - meato_net
 
   # ---------- USER UI ----------
   user-ui:
@@ -148,8 +138,6 @@ services:
     restart: unless-stopped
     expose:
       - "3000"
-    networks:
-      - meato_net
 
   # ---------- VENDOR UI ----------
   vendor-ui:
@@ -164,8 +152,6 @@ services:
     restart: unless-stopped
     expose:
       - "3003"
-    networks:
-      - meato_net
 
   # ---------- MANAGER UI ----------
   manager-ui:
@@ -180,8 +166,6 @@ services:
     restart: unless-stopped
     expose:
       - "3002"
-    networks:
-      - meato_net
 
   # ---------- ADMIN UI ----------
   admin-ui:
@@ -196,26 +180,25 @@ services:
     restart: unless-stopped
     expose:
       - "3001"
-    networks:
-      - meato_net
 
-  # ---------- POSTGRESQL ----------
-  db:
-    image: postgres:16-alpine
-    container_name: postgres-db
-    environment:
-      - NODE_ENV=production
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: meato_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    networks:
-      - meato_net
+
+  # # ---------- POSTGRESQL ----------
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: postgres-db
+  #   environment:
+  #     - NODE_ENV=production
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+  #     POSTGRES_DB: meato_db
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #   networks:
+  #     - meato_net
 
   # ---------- NGINX REVERSE PROXY ----------
   nginx:
@@ -234,13 +217,13 @@ services:
       - vendor-ui
       - manager-ui
       - admin-ui
-    networks:
-      - meato_net
+    # networks:
+    #   - meato_net
 
 # ---------- NETWORKS & VOLUMES ----------
-networks:
-  meato_net:
-    driver: bridge
+# networks:
+#   meato_net:
+#     driver: bridge
 
 volumes:
   db_data:
