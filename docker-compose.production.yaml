@@ -133,7 +133,7 @@ services:
     image: durvesh502/meato-user-ui:latest
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.com
+      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
     container_name: user-ui
     restart: unless-stopped
     expose:
@@ -148,7 +148,7 @@ services:
     container_name: vendor-ui
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.com
+      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
     restart: unless-stopped
     expose:
       - "3003"
@@ -161,7 +161,7 @@ services:
     image: durvesh502/meato-manager-ui:latest
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.com
+      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
     container_name: manager-ui
     restart: unless-stopped
     expose:
@@ -175,7 +175,7 @@ services:
     image: durvesh502/meato-admin-ui:latest
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.com
+      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
     container_name: admin-ui
     restart: unless-stopped
     expose:
