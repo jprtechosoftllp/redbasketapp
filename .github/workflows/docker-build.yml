@@ -98,7 +98,7 @@ jobs:
    strategy:
      matrix: ${{ fromJson(needs.detect-changes.outputs.backend-matrix)}}
      fail-fast: false
-     max-parallel: 5
+    #  max-parallel: 5
 
    steps:
 
