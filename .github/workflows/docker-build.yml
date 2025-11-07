@@ -11,8 +11,6 @@ on:
       description: "Force rebuild all services"
       required: false
       default: 'false'
-env:
-  DOCKER_REGISTRY: docker.io
 
 jobs:
   # Detect which services have changed
@@ -65,199 +63,200 @@ jobs:
             echo "Force rebuild required - building all services"
             BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
             FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
-          else
-            if [[ "${{ steps.changed-files.outputs.shared_any_changed }}" == "true" ]]; then
-              echo "Shared files changed - building all services"
-              BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
-              FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
-            else
-              # individual service checks...
-            fi
           fi
-
-          BACKEND_MATRIX=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
-          FRONTEND_MATRIX=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
-
-          echo "backend-matrix=$BACKEND_MATRIX" >> $GITHUB_OUTPUT
-          echo "frontend-matrix=$FRONTEND_MATRIX" >> $GITHUB_OUTPUT
-          echo "has-backend-change=$( [ ${#BACKEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
-          echo "has-frontend-change=$( [ ${#FRONTEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
-          echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
-          echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
-
-  # # Build only chages backend services in perallel
-  # build-backend:
-  #  needs: detect-changes
-  #  if: needs.detect-changes.outputs.has-backend-changes == 'true'
-  #  environment: production
-  #  runs-on: ubuntu-latest
-  #  strategy:
-  #    matrix: ${{ fromJson(need.detect-changes.outputs.backend-matrix)}}
-  #    fail-fast: false
-  #    max-parallel: 5
-
-  # steps:
-  #  - name: Free up disk space
-  #    run: |
-  #      sudo rm -rf /usr/share/dotent /opt/ghic /usr/local/share/boost
-  #      sudo apt-get clean
-  #      df -h
-
-  #  - name: Checkout code
-  #    uses: actions/checkout@v4
-
-  #  - name: Set up Docker Buildx
-  #    uses: docker/setup-buildx-action@v3
-
-  #  - name: Log in to Docker Hub
-  #    uses: docker/login-action@v3
-  #    with:
-  #    username: ${{ secrets.DOCKER_HUB_USERNAME }}
-  #    password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-  
-  #  - name: Check if image exists
-  #    id: check-image
-  #    run: |
-  #      IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
-  #      if docker manifest inspect $IMAGE > /dev/null 2>&1; then
-  #        echo "exists=true" >> $GITHUB_OUTPUT
-  #      else
-  #        echo "exists=false" >> $GITHUB_OUTPUT
-  #      fi
-
-  #  - name: Setup build environment
-  #    if: steps.check-image.outputs.exists == 'false' || needs.detect-changes
-  #    run: |
-  #      # Setup pnpm
-  #      npm install -g pnpm@@10.18.2
-
-  #      # Create .npmrc
-  #      echo "auto-install-peers=ture" > .npmrc
-  #      echo "shamefully-host=true" >> .npmrc
-  #      pnpm install --frozen-lockfile
-  #      pnpm add cookie-parser tslib express
-
-  #      npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
-  #      npx drizzle-kit push --config=drizzle.config.ts || echo "Skipping migration push"
-
-  #      # Build only services
-  #      npx nx build ${{ matrix.service }}
-
-  #  - name: Build and push Docker image
-  #    if: steps.check-image.outputs.exists == 'false' || needs.detect-changes.outputs.has-backend-changes == 'true'
-  #    uses: docker/build-push-action@v5
-  #    with:
-  #     context: .
-  #     file: /app/${{ matrix.service }}/Dockerfile
-  #     push: true
-  #     tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
-  #     cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
-  #     cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:buildcache,mode=max
-  #     build-args: |
-  #       SERVICE_NAME=${{ matrix.service }}
-
-  # # Build only changes frontend services in perallel
-  # build-frontend:
-  #  needs: detect-changes
-  #  if: needs.detect-changes.outputs.has-frontend-changes == 'true'
-  #  runs-on: ubuntu-latest
-  #  strategy:
-  #    matrix: ${{ fromJson(need.detect-changes.outputs.frontend-matrix)}}
-  #    fail-fast: false
-  #   #  max-parallel: 3
-
-  # steps:
-  #  - name: Free up disk space
-  #    run: |
-  #      sudo rm -rf /usr/share/dotent /opt/ghic /usr/local/share/boost
-  #      sudo apt-get clean
-  #      df -h
-
-  #  - name: Checkout repository
-  #    uses: actions/checkout@v4
-
-  #  - name: Set up Docker Buildx
-  #    uses: docker/setup-buildx-action@v3
-
-  #  - name: Log in to Docker Hub
-  #    uses: docker/login-action@v3
-  #    with:
-  #    username: ${{ secrets.DOCKER_HUB_USERNAME }}
-  #    password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-  #  - name: Check if image exists
-  #    id: check-image
-  #    run: |
-  #      IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
-  #      if docker manifest inspect $IMAGE > /dev/null 2>&1; then
-  #        echo "exists=true" >> $GITHUB_OUTPUT
-  #      else
-  #        echo "exists=false" >> $GITHUB_OUTPUT
-  #      fi
-
-  #  - name: Build and push Docker image
-  #    if: steps.check-image.outputs.exists == 'false' || needs.detect-changes.outputs.has-frontend-changes == 'true'
-  #    uses: docker/build-push-action@v5
-  #    with:
-  #     context: .
-  #     file: /app/${{ matrix.service }}/Dockerfile
-  #     push: true
-  #     tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
-  #     cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
-  #     cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:buildcache,mode=max
-  #     build-args: |
-  #       SERVICE_NAME=${{ matrix.service }}
-
-  # # 🚀 3. Deploy to EC2
-  # deploy-to-ec2:
-  # name: Deploy All to AWS
-  # needs: [detect-changes, build-backend, build-frontend]
-  # runs-on: ubuntu-latest
-  # environment: production
-  # if: |
-  #   always() &&
-  #   github.ref == 'refs/heads/main' &&
-  #   github.event_name == 'push' &&
-  #   (needs.build-backend.result == 'success' || needs.build-backend.result == 'skipped') &&
-  #   (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
-  # steps:
-  #   - name: Checkout Code
-  #     uses: actions/checkout@v4
-
-  #   - name: Deploy to EC2
-  #     uses: appleboy/ssh-action@v1.0.0
-  #     with:
-  #       host: ${{ secrets.EC2_HOST }}
-  #       username: ubuntu
-  #       key: ${{ secrets.EC2_PRIVATE_KEY }}
-  #       port: 22
-  #       script: |
-  #         echo "🔧 Starting EC2 deployment..."
-
-  #         # Navigate to app directory
-  #         cd /home/ubuntu/meatobackend
-
-  #         # Configure Git to use personal access token
-  #         git config --global url."https://${{ secrets.GH_ACCESS_TOKEN }}@github.com/" insteadOf "https://github.com/"
-
-  #         # Pull latest code
-  #         git pull origin main
-
-  #         # Set environment variables
-  #         export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
-
-  #         # Get changed services from workflow outputs
-  #         export CHANGED_BACKEND='${{ needs.detect-changes.outputs.changed-backend }}'
-  #         export CHANGED_FRONTEND='${{ needs.detect-changes.outputs.changed-frontend }}'
-
-  #         # If no changes detected, deploy all services
-  #         if [ "$CHANGED_BACKEND" == "[]" ] && [ "$CHANGED_FRONTEND" == "[]" ]; then
-  #           echo "No changes detected — deploying all services"
-  #           export CHANGED_BACKEND='["auth-service", "product-service", "admin-service", "manager-service", "api-gateway"]'
-  #           export CHANGED_FRONTEND='["admin-ui", "user-ui", "vendor-ui", "manager-ui"]'
+  #         else
+  #           if [[ "${{ steps.changed-files.outputs.shared_any_changed }}" == "true" ]]; then
+  #             echo "Shared files changed - building all services"
+  #             BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
+  #             FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
+  #           else
+  #             # individual service checks...
+  #           fi
   #         fi
 
-  #         # Run your deployment script (example)
-  #         ./deploy.sh "$CHANGED_BACKEND" "$CHANGED_FRONTEND"
+  #         BACKEND_MATRIX=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
+  #         FRONTEND_MATRIX=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
 
-  #         echo "✅ Deployment completed."
+  #         echo "backend-matrix=$BACKEND_MATRIX" >> $GITHUB_OUTPUT
+  #         echo "frontend-matrix=$FRONTEND_MATRIX" >> $GITHUB_OUTPUT
+  #         echo "has-backend-change=$( [ ${#BACKEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+  #         echo "has-frontend-change=$( [ ${#FRONTEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+  #         echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+  #         echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+
+  # # # Build only chages backend services in perallel
+  # # build-backend:
+  # #  needs: detect-changes
+  # #  if: needs.detect-changes.outputs.has-backend-changes == 'true'
+  # #  environment: production
+  # #  runs-on: ubuntu-latest
+  # #  strategy:
+  # #    matrix: ${{ fromJson(need.detect-changes.outputs.backend-matrix)}}
+  # #    fail-fast: false
+  # #    max-parallel: 5
+
+  # # steps:
+  # #  - name: Free up disk space
+  # #    run: |
+  # #      sudo rm -rf /usr/share/dotent /opt/ghic /usr/local/share/boost
+  # #      sudo apt-get clean
+  # #      df -h
+
+  # #  - name: Checkout code
+  # #    uses: actions/checkout@v4
+
+  # #  - name: Set up Docker Buildx
+  # #    uses: docker/setup-buildx-action@v3
+
+  # #  - name: Log in to Docker Hub
+  # #    uses: docker/login-action@v3
+  # #    with:
+  # #    username: ${{ secrets.DOCKER_HUB_USERNAME }}
+  # #    password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+  
+  # #  - name: Check if image exists
+  # #    id: check-image
+  # #    run: |
+  # #      IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
+  # #      if docker manifest inspect $IMAGE > /dev/null 2>&1; then
+  # #        echo "exists=true" >> $GITHUB_OUTPUT
+  # #      else
+  # #        echo "exists=false" >> $GITHUB_OUTPUT
+  # #      fi
+
+  # #  - name: Setup build environment
+  # #    if: steps.check-image.outputs.exists == 'false' || needs.detect-changes
+  # #    run: |
+  # #      # Setup pnpm
+  # #      npm install -g pnpm@@10.18.2
+
+  # #      # Create .npmrc
+  # #      echo "auto-install-peers=ture" > .npmrc
+  # #      echo "shamefully-host=true" >> .npmrc
+  # #      pnpm install --frozen-lockfile
+  # #      pnpm add cookie-parser tslib express
+
+  # #      npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
+  # #      npx drizzle-kit push --config=drizzle.config.ts || echo "Skipping migration push"
+
+  # #      # Build only services
+  # #      npx nx build ${{ matrix.service }}
+
+  # #  - name: Build and push Docker image
+  # #    if: steps.check-image.outputs.exists == 'false' || needs.detect-changes.outputs.has-backend-changes == 'true'
+  # #    uses: docker/build-push-action@v5
+  # #    with:
+  # #     context: .
+  # #     file: /app/${{ matrix.service }}/Dockerfile
+  # #     push: true
+  # #     tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
+  # #     cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
+  # #     cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:buildcache,mode=max
+  # #     build-args: |
+  # #       SERVICE_NAME=${{ matrix.service }}
+
+  # # # Build only changes frontend services in perallel
+  # # build-frontend:
+  # #  needs: detect-changes
+  # #  if: needs.detect-changes.outputs.has-frontend-changes == 'true'
+  # #  runs-on: ubuntu-latest
+  # #  strategy:
+  # #    matrix: ${{ fromJson(need.detect-changes.outputs.frontend-matrix)}}
+  # #    fail-fast: false
+  # #   #  max-parallel: 3
+
+  # # steps:
+  # #  - name: Free up disk space
+  # #    run: |
+  # #      sudo rm -rf /usr/share/dotent /opt/ghic /usr/local/share/boost
+  # #      sudo apt-get clean
+  # #      df -h
+
+  # #  - name: Checkout repository
+  # #    uses: actions/checkout@v4
+
+  # #  - name: Set up Docker Buildx
+  # #    uses: docker/setup-buildx-action@v3
+
+  # #  - name: Log in to Docker Hub
+  # #    uses: docker/login-action@v3
+  # #    with:
+  # #    username: ${{ secrets.DOCKER_HUB_USERNAME }}
+  # #    password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+  # #  - name: Check if image exists
+  # #    id: check-image
+  # #    run: |
+  # #      IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
+  # #      if docker manifest inspect $IMAGE > /dev/null 2>&1; then
+  # #        echo "exists=true" >> $GITHUB_OUTPUT
+  # #      else
+  # #        echo "exists=false" >> $GITHUB_OUTPUT
+  # #      fi
+
+  # #  - name: Build and push Docker image
+  # #    if: steps.check-image.outputs.exists == 'false' || needs.detect-changes.outputs.has-frontend-changes == 'true'
+  # #    uses: docker/build-push-action@v5
+  # #    with:
+  # #     context: .
+  # #     file: /app/${{ matrix.service }}/Dockerfile
+  # #     push: true
+  # #     tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
+  # #     cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
+  # #     cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:buildcache,mode=max
+  # #     build-args: |
+  # #       SERVICE_NAME=${{ matrix.service }}
+
+  # # # 🚀 3. Deploy to EC2
+  # # deploy-to-ec2:
+  # # name: Deploy All to AWS
+  # # needs: [detect-changes, build-backend, build-frontend]
+  # # runs-on: ubuntu-latest
+  # # environment: production
+  # # if: |
+  # #   always() &&
+  # #   github.ref == 'refs/heads/main' &&
+  # #   github.event_name == 'push' &&
+  # #   (needs.build-backend.result == 'success' || needs.build-backend.result == 'skipped') &&
+  # #   (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
+  # # steps:
+  # #   - name: Checkout Code
+  # #     uses: actions/checkout@v4
+
+  # #   - name: Deploy to EC2
+  # #     uses: appleboy/ssh-action@v1.0.0
+  # #     with:
+  # #       host: ${{ secrets.EC2_HOST }}
+  # #       username: ubuntu
+  # #       key: ${{ secrets.EC2_PRIVATE_KEY }}
+  # #       port: 22
+  # #       script: |
+  # #         echo "🔧 Starting EC2 deployment..."
+
+  # #         # Navigate to app directory
+  # #         cd /home/ubuntu/meatobackend
+
+  # #         # Configure Git to use personal access token
+  # #         git config --global url."https://${{ secrets.GH_ACCESS_TOKEN }}@github.com/" insteadOf "https://github.com/"
+
+  # #         # Pull latest code
+  # #         git pull origin main
+
+  # #         # Set environment variables
+  # #         export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
+
+  # #         # Get changed services from workflow outputs
+  # #         export CHANGED_BACKEND='${{ needs.detect-changes.outputs.changed-backend }}'
+  # #         export CHANGED_FRONTEND='${{ needs.detect-changes.outputs.changed-frontend }}'
+
+  # #         # If no changes detected, deploy all services
+  # #         if [ "$CHANGED_BACKEND" == "[]" ] && [ "$CHANGED_FRONTEND" == "[]" ]; then
+  # #           echo "No changes detected — deploying all services"
+  # #           export CHANGED_BACKEND='["auth-service", "product-service", "admin-service", "manager-service", "api-gateway"]'
+  # #           export CHANGED_FRONTEND='["admin-ui", "user-ui", "vendor-ui", "manager-ui"]'
+  # #         fi
+
+  # #         # Run your deployment script (example)
+  # #         ./deploy.sh "$CHANGED_BACKEND" "$CHANGED_FRONTEND"
+
+  # #         echo "✅ Deployment completed."
