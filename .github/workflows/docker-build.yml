@@ -6,6 +6,7 @@ on:
     branches: [main]
   
   workflow_dispatch:
+  environment: production
   inputs:
     force_rebuild:
       description: "Force rebuild all services"
@@ -19,6 +20,7 @@ env:
 jobs:
   # Detect which services have changed
   detect-changes:
+  environment: production
     runs-on: ubuntu-latest
     outputs:
       backend-matrix: ${{ setps.set-matrix.outputs.backend-matrix}}
@@ -121,6 +123,7 @@ jobs:
   build-backend:
    needs: detect-changes
    if: needs.detect-changes.outputs.has-backend-changes == 'true'
+   environment: production
    runs-on: ubuntu-latest
    strategy:
      matrix: ${{ fromJson(need.detect-changes.outputs.backend-matrix)}}
