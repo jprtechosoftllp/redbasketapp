@@ -214,56 +214,56 @@ jobs:
           build-args: |
             SERVICE_NAME=${{ matrix.service }}
 
-  # # # 🚀 3. Deploy to EC2
-  # # deploy-to-ec2:
-  # # name: Deploy All to AWS
-  # # needs: [detect-changes, build-backend, build-frontend]
-  # # runs-on: ubuntu-latest
-  # # environment: production
-  # # if: |
-  # #   always() &&
-  # #   github.ref == 'refs/heads/main' &&
-  # #   github.event_name == 'push' &&
-  # #   (needs.build-backend.result == 'success' || needs.build-backend.result == 'skipped') &&
-  # #   (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
-  # # steps:
-  # #   - name: Checkout Code
-  # #     uses: actions/checkout@v4
+  # 🚀 3. Deploy to EC2
+  deploy-to-ec2:
+  name: Deploy All to AWS
+  needs: [detect-changes, build-backend, build-frontend]
+  runs-on: ubuntu-latest
+  environment: production
+  if: |
+    always() &&
+    github.ref == 'refs/heads/main' &&
+    github.event_name == 'push' &&
+    (needs.build-backend.result == 'success' || needs.build-backend.result == 'skipped') &&
+    (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-  # #   - name: Deploy to EC2
-  # #     uses: appleboy/ssh-action@v1.0.0
-  # #     with:
-  # #       host: ${{ secrets.EC2_HOST }}
-  # #       username: ubuntu
-  # #       key: ${{ secrets.EC2_PRIVATE_KEY }}
-  # #       port: 22
-  # #       script: |
-  # #         echo "🔧 Starting EC2 deployment..."
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_PRIVATE_KEY }}
+        port: 22
+        script: |
+          echo "🔧 Starting EC2 deployment..."
 
-  # #         # Navigate to app directory
-  # #         cd /home/ubuntu/meatobackend
+          # Navigate to app directory
+          cd /home/ubuntu/meatobackend
 
-  # #         # Configure Git to use personal access token
-  # #         git config --global url."https://${{ secrets.GH_ACCESS_TOKEN }}@github.com/" insteadOf "https://github.com/"
+          # Configure Git to use personal access token
+          git config --global url."https://${{ secrets.GH_ACCESS_TOKEN }}@github.com/" insteadOf "https://github.com/"
 
-  # #         # Pull latest code
-  # #         git pull origin main
+          # Pull latest code
+          git pull origin main
 
-  # #         # Set environment variables
-  # #         export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
+          # Set environment variables
+          export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
 
-  # #         # Get changed services from workflow outputs
-  # #         export CHANGED_BACKEND='${{ needs.detect-changes.outputs.changed-backend }}'
-  # #         export CHANGED_FRONTEND='${{ needs.detect-changes.outputs.changed-frontend }}'
+          # Get changed services from workflow outputs
+          export CHANGED_BACKEND='${{ needs.detect-changes.outputs.changed-backend }}'
+          export CHANGED_FRONTEND='${{ needs.detect-changes.outputs.changed-frontend }}'
 
-  # #         # If no changes detected, deploy all services
-  # #         if [ "$CHANGED_BACKEND" == "[]" ] && [ "$CHANGED_FRONTEND" == "[]" ]; then
-  # #           echo "No changes detected — deploying all services"
-  # #           export CHANGED_BACKEND='["auth-service", "product-service", "admin-service", "manager-service", "api-gateway"]'
-  # #           export CHANGED_FRONTEND='["admin-ui", "user-ui", "vendor-ui", "manager-ui"]'
-  # #         fi
+          # If no changes detected, deploy all services
+          if [ "$CHANGED_BACKEND" == "[]" ] && [ "$CHANGED_FRONTEND" == "[]" ]; then
+            echo "No changes detected — deploying all services"
+            export CHANGED_BACKEND='["auth-service", "product-service", "admin-service", "manager-service", "api-gateway"]'
+            export CHANGED_FRONTEND='["admin-ui", "user-ui", "vendor-ui", "manager-ui"]'
+          fi
 
-  # #         # Run your deployment script (example)
-  # #         ./deploy.sh "$CHANGED_BACKEND" "$CHANGED_FRONTEND"
+          # Run your deployment script (example)
+          ./deploy.sh "$CHANGED_BACKEND" "$CHANGED_FRONTEND"
 
-  # #         echo "✅ Deployment completed."
+          echo "✅ Deployment completed."
