@@ -63,7 +63,25 @@ jobs:
             echo "Force rebuild required - building all services"
             BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
             FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
+          else
+            if [[ "${{ steps.changed-files.outputs.shared_any_changed }}" == "true" ]]; then
+              echo "Shared files changed - building all services"
+              BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
+              FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
+            else
+              # individual service checks...
+            fi
           fi
+
+          BACKEND_MATRIX=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
+          FRONTEND_MATRIX=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
+
+          echo "backend-matrix=$BACKEND_MATRIX" >> $GITHUB_OUTPUT
+          echo "frontend-matrix=$FRONTEND_MATRIX" >> $GITHUB_OUTPUT
+          echo "has-backend-change=$( [ ${#BACKEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          echo "has-frontend-change=$( [ ${#FRONTEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
   #         else
   #           if [[ "${{ steps.changed-files.outputs.shared_any_changed }}" == "true" ]]; then
   #             echo "Shared files changed - building all services"
