@@ -22,102 +22,104 @@ jobs:
   detect-changes:
   environment: production
   runs-on: ubuntu-latest
-  
+
   outputs:
-      backend-matrix: ${{ steps.set-matrix.outputs.backend-matrix }}
-      frontend-matrix: ${{ steps.set-matrix.outputs.frontend-matrix }}
-      has-backend-changes: ${{ steps.set-matrix.outputs.has-backend-change }}
-      has-frontend-changes: ${{ steps.set-matrix.outputs.has-frontend-change }}
-      changed-backend: ${{ steps.set-matrix.outputs.changed-backend }}
-      changed-frontend: ${{ steps.set-matrix.outputs.changed-frontend }}
+    backend-matrix: ${{ steps.set-matrix.outputs.backend-matrix }}
+    frontend-matrix: ${{ steps.set-matrix.outputs.frontend-matrix }}
+    has-backend-change: ${{ steps.set-matrix.outputs.has-backend-change }}
+    has-frontend-change: ${{ steps.set-matrix.outputs.has-frontend-change }}
+    changed-backend: ${{ steps.set-matrix.outputs.changed-backend }}
+    changed-frontend: ${{ steps.set-matrix.outputs.changed-frontend }}
 
   steps:
     - name: Checkout Code
       uses: actions/checkout@v4
       with:
-          fetch-depth: 0
+        fetch-depth: 0
+
     - name: Get changed files
       id: changed-files
       uses: tj-actions/changed-files@v41
       with:
         files_yaml: |
-         admin_service:
-           - apps/admin-service/**
-           - packages/backend/**
-         auth_service:
-          - apps/auth-service/**
-          - packages/backend/**
-         product_service:
-          - apps/product-service/**
-          - packages/backend/**
-         api_gateway:
-          - apps/api_gateway/**
-          - packages/backend/**
-         manager-service:
-          - apps/manager-service/**
-          - packages/backend/**
-    
+          admin_service:
+            - apps/admin-service/**
+            - packages/backend/**
+          auth_service:
+            - apps/auth-service/**
+            - packages/backend/**
+          product_service:
+            - apps/product-service/**
+            - packages/backend/**
+          api_gateway:
+            - apps/api_gateway/**
+            - packages/backend/**
+          manager_service:   # fixed naming consistency
+            - apps/manager-service/**
+            - packages/backend/**
+
     - name: Set matrix for changed services
       id: set-matrix
       run: |
-        # Initialize array
         BACKEND_SERVICE=()
         FRONTEND_SERVICE=()
 
-        # Check if force rebuild is required
-        if [[ "${{ github.event.inputs.force_rebuild}}" == "true"]]; then
-           echo "Force rebuild required -building all services"
-           BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
-           FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
+        # Force rebuild
+        if [[ "${{ github.event.inputs.force_rebuild }}" == "true" ]]; then
+          echo "Force rebuild required - building all services"
+          BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
+          FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
         else
-          # Check shared files (affects all service)
+          # Shared files
           if [[ "${{ steps.changed-files.outputs.shared_any_changed }}" == "true" ]]; then
-              echo "share files changed - building all services"
-              BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
-              FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
+            echo "Shared files changed - building all services"
+            BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
+            FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
           else
-            # Check individual service
+            # Individual backend services
             if [[ "${{ steps.changed-files.outputs.auth_service_any_changed }}" == "true" ]]; then
-                BACKEND_SERVICE+=("auth-service")
+              BACKEND_SERVICE+=("auth-service")
             fi
             if [[ "${{ steps.changed-files.outputs.product_service_any_changed }}" == "true" ]]; then
-                BACKEND_SERVICE+=("product-service")
+              BACKEND_SERVICE+=("product-service")
             fi
             if [[ "${{ steps.changed-files.outputs.manager_service_any_changed }}" == "true" ]]; then
-               BACKEND_SERVICE+=("manager-service")
+              BACKEND_SERVICE+=("manager-service")
             fi
             if [[ "${{ steps.changed-files.outputs.admin_service_any_changed }}" == "true" ]]; then
-                BACKEND_SERVICE+=("admin-service")
+              BACKEND_SERVICE+=("admin-service")
             fi
             if [[ "${{ steps.changed-files.outputs.api_gateway_any_changed }}" == "true" ]]; then
-               BACKEND_SERVICE+=("api-gateway")
+              BACKEND_SERVICE+=("api-gateway")
             fi
 
+            # Individual frontend services
             if [[ "${{ steps.changed-files.outputs.user_ui_any_changed }}" == "true" ]]; then
-               FRONTEND_SERVICE+=("user-ui")
+              FRONTEND_SERVICE+=("user-ui")
             fi
             if [[ "${{ steps.changed-files.outputs.manager_ui_any_changed }}" == "true" ]]; then
-               FRONTEND_SERVICE+=("manager-ui")
+              FRONTEND_SERVICE+=("manager-ui")
             fi
             if [[ "${{ steps.changed-files.outputs.vendor_ui_any_changed }}" == "true" ]]; then
-               FRONTEND_SERVICE+=("vendor-ui")
+              FRONTEND_SERVICE+=("vendor-ui")
             fi
             if [[ "${{ steps.changed-files.outputs.admin_ui_any_changed }}" == "true" ]]; then
               FRONTEND_SERVICE+=("admin-ui")
             fi
-            fi
+          fi
+        fi
 
-            # Convert arrays to JSON matrix format
-              BACKEND_MATRIX=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
-              FRONTEND_MATRIX=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
+        # Convert arrays to JSON matrix format
+        BACKEND_MATRIX=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
+        FRONTEND_MATRIX=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
 
-            # Set outputs
-            echo "backend-matrix=$BACKEND_MATRIX" >> $GITHUB_OUTPUT
-            echo "frontend-matrix=$FRONTEND_MATRIX" >> $GITHUB_OUTPUT
-            echo "has-backend-change=$( [ ${#BACKEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
-            echo "has-frontend-change=$( [ ${#FRONTEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
-            echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
-            echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+        # Set outputs
+        echo "backend-matrix=$BACKEND_MATRIX" >> $GITHUB_OUTPUT
+        echo "frontend-matrix=$FRONTEND_MATRIX" >> $GITHUB_OUTPUT
+        echo "has-backend-change=$( [ ${#BACKEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+        echo "has-frontend-change=$( [ ${#FRONTEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+        echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+        echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
   # # Build only chages backend services in perallel
   # build-backend:
