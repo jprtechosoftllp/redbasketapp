@@ -54,40 +54,40 @@ jobs:
               - packages/backend/**
 
       - name: Set matrix for changed services
-  id: set-matrix
-  run: |
-    BACKEND_SERVICE=()
-    FRONTEND_SERVICE=()
+        id: set-matrix
+        run: |
+          BACKEND_SERVICE=()
+          FRONTEND_SERVICE=()
 
-    # Force rebuild
-    if [[ "${{ github.event.inputs.force_rebuild }}" == "true" ]]; then
-      echo "Force rebuild required - building all services"
-      BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
-      FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
-    else
-      # Shared files
-      if [[ "${{ steps.changed-files.outputs.shared_any_changed }}" == "true" ]]; then
-        echo "Shared files changed - building all services"
-        BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
-        FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
-      else
-        # Individual service checks go here...
-        if [[ "${{ steps.changed-files.outputs.auth_service_any_changed }}" == "true" ]]; then
-          BACKEND_SERVICE+=("auth-service")
-        fi
-        # repeat for other services...
-      fi
-    fi
+          # Force rebuild
+          if [[ "${{ github.event.inputs.force_rebuild }}" == "true" ]]; then
+             echo "Force rebuild required - building all services"
+             BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
+             FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
+          else
+            # Shared files
+            if [[ "${{ steps.changed-files.outputs.shared_any_changed }}" == "true" ]]; then
+               echo "Shared files changed - building all services"
+               BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
+               FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
+            else
+              # Individual service checks go here...
+              if [[ "${{ steps.changed-files.outputs.auth_service_any_changed }}" == "true" ]]; then
+                 BACKEND_SERVICE+=("auth-service")
+              fi
+               # repeat for other services...
+            fi
+          fi
 
-    BACKEND_MATRIX=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
-    FRONTEND_MATRIX=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
+          BACKEND_MATRIX=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
+          FRONTEND_MATRIX=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
 
-    echo "backend-matrix=$BACKEND_MATRIX" >> $GITHUB_OUTPUT
-    echo "frontend-matrix=$FRONTEND_MATRIX" >> $GITHUB_OUTPUT
-    echo "has-backend-change=$( [ ${#BACKEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
-    echo "has-frontend-change=$( [ ${#FRONTEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
-    echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
-    echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "backend-matrix=$BACKEND_MATRIX" >> $GITHUB_OUTPUT
+          echo "frontend-matrix=$FRONTEND_MATRIX" >> $GITHUB_OUTPUT
+          echo "has-backend-change=$( [ ${#BACKEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          echo "has-frontend-change=$( [ ${#FRONTEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
 
   # # # Build only chages backend services in perallel
