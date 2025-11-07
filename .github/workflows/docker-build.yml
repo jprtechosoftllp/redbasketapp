@@ -86,9 +86,8 @@ jobs:
           echo "frontend-matrix=$FRONTEND_MATRIX" >> $GITHUB_OUTPUT
           echo "has-backend-change=$( [ ${#BACKEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
           echo "has-frontend-change=$( [ ${#FRONTEND_SERVICE[@]} -gt 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
-          echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
-          echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split(\"\\n\") | map(select(length > 0))')" >> $GITHUB_OUTPUT
-
+          echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
   # # # Build only chages backend services in perallel
   # # build-backend:
