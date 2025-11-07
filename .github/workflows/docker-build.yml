@@ -96,7 +96,7 @@ jobs:
    environment: production
    runs-on: ubuntu-latest
    strategy:
-     matrix: ${{ fromJson(need.detect-changes.outputs.backend-matrix)}}
+     matrix: ${{ fromJson(needs.detect-changes.outputs.backend-matrix)}}
      fail-fast: false
      max-parallel: 5
 
