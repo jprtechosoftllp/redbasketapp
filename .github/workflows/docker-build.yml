@@ -21,8 +21,8 @@ jobs:
   # Detect which services have changed
   detect-changes:
   environment: production
-    runs-on: ubuntu-latest
-    outputs:
+  runs-on: ubuntu-latest
+  outputs:
       backend-matrix: ${{ setps.set-matrix.outputs.backend-matrix}}
       frontend-matrix: ${{ steps.set-matrix.outputs.frontend-matrix}}
       has-backend-changes: ${{ steps.set-matrix.outputs.has-backend-change}}
@@ -30,7 +30,7 @@ jobs:
       changed-backend: ${{ steps.set-matrix.outputs.changed-backend}}
       changed-frontend: ${{ steps.set-matrix.outputs.changed-frontend}}
 
-    steps:
+  steps:
   - name: Checkout Code
     uses: action/check@4
     with:
