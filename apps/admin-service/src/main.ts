@@ -14,28 +14,30 @@ const isProduction = process.env.NODE_ENV === 'production';
 const host = isProduction ? '0.0.0.0' : 'localhost';
 const app:Express = express();
 
-// CORS configuration
-const allowedOrigins = isProduction
-  ? [
-      'https://meatonew-backend-vendor-ui.vercel.app',
-      'https://meatonew-backend-admin-ui.vercel.app',
-      'https://meatonew-backend-manager-ui.vercel.app',
-      'https://meatonew-backend.vercel.app',
-    ]
-  : [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://localhost:3003',
-    ];
+// // CORS configuration
+// const allowedOrigins = isProduction
+//   ? [
+//       'https://meatonew-backend-vendor-ui.vercel.app',
+//       'https://meatonew-backend-admin-ui.vercel.app',
+//       'https://meatonew-backend-manager-ui.vercel.app',
+//       'https://meatonew-backend.vercel.app',
+//     ]
+//   : [
+//       'http://localhost:3000',
+//       'http://localhost:3001',
+//       'http://localhost:3002',
+//       'http://localhost:3003',
+//     ];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: allowedOrigins,
+//     allowedHeaders: ['Content-Type', 'Authorization'],
+//     credentials: true,
+//   })
+// );
+
+app.use(cors());
 
 app.use(cookieParser());
 app.use(express.json());
@@ -60,7 +62,7 @@ app.use(errorMiddleware);
 const server = app.listen(port, host, () => {
   console.log(`🚀 Admin Service listening at http://${host}:${port}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔐 CORS Origins: ${JSON.stringify(allowedOrigins)}`);
+  // console.log(`🔐 CORS Origins: ${JSON.stringify(allowedOrigins)}`);
 });
 
 // Graceful shutdown

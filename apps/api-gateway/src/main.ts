@@ -14,32 +14,34 @@ const host = isProduction ? '0.0.0.0' : 'localhost';
 
 const app = express();
 
-// CORS configuration
-const allowedOrigins = isProduction
-  ? [
-    'https://meatonew-backend-vendor-ui.vercel.app',
-    'https://meatonew-backend-admin-ui.vercel.app',
-    'https://meatonew-backend-manager-ui.vercel.app',
-    'https://meatonew-backend.vercel.app',
-  ]
-  :
-  [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://localhost:3003',
-    'http://localhost:8085',
-    'http://localhost:8086',
-    'http://localhost:8087'
-  ];
+// // CORS configuration
+// const allowedOrigins = isProduction
+//   ? [
+//     'https://meatonew-backend-vendor-ui.vercel.app',
+//     'https://meatonew-backend-admin-ui.vercel.app',
+//     'https://meatonew-backend-manager-ui.vercel.app',
+//     'https://meatonew-backend.vercel.app',
+//   ]
+//   :
+//   [
+//     'http://localhost:3000',
+//     'http://localhost:3001',
+//     'http://localhost:3002',
+//     'http://localhost:3003',
+//     'http://localhost:8085',
+//     'http://localhost:8086',
+//     'http://localhost:8087'
+//   ];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: allowedOrigins,
+//     allowedHeaders: ['Content-Type', 'Authorization'],
+//     credentials: true,
+//   })
+// );
+
+app.use(cors());
 
 app.use(cookieParser());
 app.use(morgan(isProduction ? 'combined' : 'dev'));
@@ -138,7 +140,7 @@ app.use('*', (req, res) => {
 const server = app.listen(port, host, () => {
   console.log(`🚀 API Gateway listening at http://${host}:${port}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔐 CORS Origins: ${JSON.stringify(allowedOrigins)}`);
+  // console.log(`🔐 CORS Origins: ${JSON.stringify(allowedOrigins)}`);
   console.log('✅ Site config initialized successfully');
 });
 

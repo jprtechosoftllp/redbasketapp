@@ -23,8 +23,7 @@ RUN pnpm add cookie-parser tslib express
 
 
 # Ensure drizzle-kit is available
-pnpm add drizzle-orm pg dotenv
-pnpm add -D drizzle-kit tsx @types/pg
+RUN pnpm add -D drizzle-kit
 
 # Generate and apply Drizzle migrations
 RUN npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
