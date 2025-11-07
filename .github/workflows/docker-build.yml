@@ -92,8 +92,7 @@ jobs:
   # Build only chages backend services in perallel
   build-backend:
    needs: detect-changes
-  #  if: needs.detect-changes.outputs.has-backend-changes == 'true'
-   if: always()
+   if: needs.detect-changes.outputs.has-backend-changes == 'true'
    environment: production
    runs-on: ubuntu-latest
    strategy:
@@ -165,8 +164,7 @@ jobs:
   # Build only changes frontend services in perallel
   build-frontend:
    needs: detect-changes
-  #  if: needs.detect-changes.outputs.has-frontend-changes == 'true'
-   if: always()
+   if: needs.detect-changes.outputs.has-frontend-changes == 'true'
    environment: production
    runs-on: ubuntu-latest
    strategy:
