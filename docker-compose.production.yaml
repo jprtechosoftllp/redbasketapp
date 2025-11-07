@@ -225,5 +225,5 @@ services:
 #   meato_net:
 #     driver: bridge
 
-volumes:
-  db_data:
+# volumes:
+#   db_data:
