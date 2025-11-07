@@ -5,13 +5,13 @@ on:
   pull_request:
     branches: [main]
   
-  workflow_dispatch:
-  environment: production
-  inputs:
-    force_rebuild:
-      description: "Force rebuild all services"
-      required: false
-      default: 'false'
+  # workflow_dispatch:
+  # environment: production
+  # inputs:
+  #   force_rebuild:
+  #     description: "Force rebuild all services"
+  #     required: false
+  #     default: 'false'
 env:
   DOCKER_REGISTRY: docker.io
   DOCKER_ACCESS_TOKEN: ${{ secret.DOCKER_ACCESS_TOKEN }}
@@ -22,7 +22,7 @@ jobs:
   detect-changes:
   environment: production
   runs-on: ubuntu-latest
-  
+
   outputs:
       backend-matrix: ${{ setps.set-matrix.outputs.backend-matrix }}
       frontend-matrix: ${{ steps.set-matrix.outputs.frontend-matrix }}
