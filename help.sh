@@ -1,6 +1,5 @@
 sudo certbot certonly --standalone \
   -d redbasketapp.hopto.org \
-  -d https://redbasketapp.hopto.org \
   --email redbasketapp@gmail.com \
   --agree-tos \
   --non-interactive
