@@ -257,7 +257,7 @@ jobs:
            script: |
               echo "🚀 Starting EC2 deployment..."
               cd ~/redbasketapp || exit 1
-              ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+              echo '${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}'
               git stash --include-untracked || true
 
               # GitHub token authentication
