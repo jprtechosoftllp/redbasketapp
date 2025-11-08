@@ -277,6 +277,6 @@ jobs:
               fi
 
               # Run your deployment script (example)
-              ./deploy.sh "$CHANGED_BACKEND" "$CHANGED_FRONTEND"
+              ./scripts/deploy-production.sh "$CHANGED_BACKEND" "$CHANGED_FRONTEND"
 
                  echo "Deployment completed."

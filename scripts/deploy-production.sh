@@ -9,8 +9,8 @@ echo "🚀 Starting production deployment..."
 : "${DOCKER_ACCESS_TOKEN:?❌ DOCKER_ACCESS_TOKEN is not set}"
 
 # Parse JSON arrays passed as arguments
-BACKEND_SERVICES=$(echo "$1" | jq -r '.[]')
-FRONTEND_SERVICES=$(echo "$2" | jq -r '.[]')
+BACKEND_SERVICES=$(echo "$1" | jq -r '.[]' || echo "")
+FRONTEND_SERVICES=$(echo "$2" | jq -r '.[]' || echo "")
 
 DOCKER_USER="${DOCKER_HUB_USERNAME:-redbasketapp}"
 
@@ -48,12 +48,17 @@ for SERVICE in $FRONTEND_SERVICES; do
 done
 
 # Start/restart services using docker-compose
-echo "📦 Deploying services with docker-compose..."
-docker-compose -f docker-compose.production.yaml up -d --remove-orphans
+if [ -f docker-compose.production.yaml ]; then
+  echo "📦 Deploying services with docker-compose..."
+  docker-compose -f docker-compose.production.yaml up -d --remove-orphans
+else
+  echo "⚠️ docker-compose.production.yaml not found — skipping compose deployment"
+fi
 
 # Health check function
 check_health() {
-  local unhealthy=$(docker inspect --format='{{.Name}} {{.State.Health.Status}}' $(docker ps -q) | grep -v healthy || true)
+  local unhealthy
+  unhealthy=$(docker inspect --format='{{.Name}} {{.State.Health.Status}}' $(docker ps -q) 2>/dev/null | grep -v healthy || true)
   if [ -z "$unhealthy" ]; then
     return 0
   else
@@ -76,13 +81,13 @@ for ((i=1; i<=MAX_RETRIES; i++)); do
   sleep $RETRY_INTERVAL
 done
 
-if [ "$i" -gt "$MAX_RETRIES" ]; then
+if (( i > MAX_RETRIES )); then
   echo "❌ Some containers failed to become healthy after $MAX_RETRIES attempts."
   exit 1
 fi
 
 # Reload Nginx if running and api-gateway is healthy
-if docker ps --format '{{.Names}}' | grep -q nginx-proxy; then
+if docker ps --format '{{.Names}}' | grep -q '^nginx-proxy$'; then
   echo "🔁 nginx-proxy is running."
 
   gateway_health=$(docker inspect -f '{{.State.Health.Status}}' api-gateway 2>/dev/null || echo "not_found")
