@@ -251,32 +251,37 @@ jobs:
            key: ${{ secrets.EC2_PRIVATE_KEY }}
            port: 22
            script: |
-              echo "Starting EC2 deployment..."
+              echo "🚀 Starting EC2 deployment..."
 
-              # Navigate to app directory
-              cd /home/ubuntu/redbasketapp
+              cd /home/ubuntu/redbasketapp || exit 1
 
-              # Configure Git to use personal access token
-              git config --global url."https://${{ secrets.GH_ACCESS_TOKEN }}@github.com/" insteadOf "https://github.com/"
+              # Safe stash to avoid git pull errors
+              git stash --include-untracked || true
 
-              # Pull latest code
-              git pull origin main
+              # Configure GitHub token for pull
+              export GH_ACCESS_TOKEN="${{ secrets.GH_ACCESS_TOKEN }}"
+              git config --global url."https://${GH_ACCESS_TOKEN}@github.com/" insteadOf "https://github.com/"
+              git pull origin main || exit 1
+
+              # Ensure deploy script is executable
+              chmod +x scripts/deploy-production.sh
 
               # Set environment variables
-               export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
+              export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
+              export DOCKER_ACCESS_TOKEN="${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
 
-              # Get changed services from workflow outputs
-               export CHANGED_BACKEND='${{ needs.detect-changes.outputs.changed-backend }}'
-               export CHANGED_FRONTEND='${{ needs.detect-changes.outputs.changed-frontend }}'
+              # Extract changed services
+              CHANGED_BACKEND='${{ needs.detect-changes.outputs.changed-backend }}'
+              CHANGED_FRONTEND='${{ needs.detect-changes.outputs.changed-frontend }}'
 
-              # If no changes detected, deploy all services
-              if [ "$CHANGED_BACKEND" == "[]" ] && [ "$CHANGED_FRONTEND" == "[]" ]; then
-                  echo "No changes detected — deploying all services"
-                  export CHANGED_BACKEND='["auth-service", "product-service", "admin-service", "manager-service", "api-gateway"]'
-                  export CHANGED_FRONTEND='["admin-ui", "user-ui", "vendor-ui", "manager-ui"]'
+              # Fallback to full deploy if no changes
+              if [ "$CHANGED_BACKEND" = "[]" ] && [ "$CHANGED_FRONTEND" = "[]" ]; then
+                echo "No changes detected — deploying all services"
+                CHANGED_BACKEND='["auth-service","product-service","admin-service","manager-service","api-gateway"]'
+                CHANGED_FRONTEND='["admin-ui","user-ui","vendor-ui","manager-ui"]'
               fi
 
-              # Run your deployment script (example)
+              # Run deployment
               ./scripts/deploy-production.sh "$CHANGED_BACKEND" "$CHANGED_FRONTEND"
 
-                 echo "Deployment completed."
+              echo "✅ EC2 deployment completed."
