@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+// import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import errorMiddleware from '@packages/backend/middlewares/error';
 import dotenv from 'dotenv';
@@ -37,13 +37,13 @@ const app = express();
 //   })
 // );
 
-app.use(cors());
+// app.use(cors());
 
 app.use(cookieParser());
 app.use(express.json());
 
 // Health check endpoint
-app.get('/', (req, res) => {
+app.get('/health', (req, res) => {
   res.status(200).json({
     message: 'Product Service is healthy',
     timestamp: new Date().toISOString(),

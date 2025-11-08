@@ -65,49 +65,49 @@ check_containers() {
 }
 
 echo "⏳ Waiting for containers to be healthy..."
-until check_containers; do
-  sleep 5
-done
+# until check_containers; do
+#   sleep 5
+# done
 
-# Deploy backend services with .env and fixed port mapping
-echo "📦 Deploying backend services..."
-for service in $BACKEND_SERVICES; do
-  echo "➡️ Deploying backend: $service"
-  if cd "apps/$service"; then
-    docker rm -f "$service" || true
-    case "$service" in
-      api-gateway)   port=8080 ;;
-      auth-service)  port=8081 ;;
-      product-service) port=8082 ;;
-      admin-service) port=8083 ;;
-      manager-service) port=8084 ;;
-      *) port=8090 ;; # fallback
-    esac
-    docker run -d --name "$service" --env-file .env -p "$port:$port" "$DOCKER_HUB_USERNAME/$service:latest"
-    cd - > /dev/null
-  else
-    echo "⚠️ Directory apps/$service not found. Skipping..."
-  fi
-done
+# # Deploy backend services with .env and fixed port mapping
+# echo "📦 Deploying backend services..."
+# for service in $BACKEND_SERVICES; do
+#   echo "➡️ Deploying backend: $service"
+#   if cd "apps/$service"; then
+#     docker rm -f "$service" || true
+#     case "$service" in
+#       api-gateway)   port=8080 ;;
+#       auth-service)  port=8081 ;;
+#       product-service) port=8082 ;;
+#       admin-service) port=8083 ;;
+#       manager-service) port=8084 ;;
+#       *) port=8090 ;; # fallback
+#     esac
+#     docker run -d --name "$service" --env-file .env -p "$port:$port" "$DOCKER_HUB_USERNAME/$service:latest"
+#     cd - > /dev/null
+#   else
+#     echo "⚠️ Directory apps/$service not found. Skipping..."
+#   fi
+# done
 
-# Deploy frontend services with fixed port mapping
-echo "🎨 Deploying frontend services..."
-for ui in $FRONTEND_SERVICES; do
-  echo "➡️ Deploying frontend: $ui"
-  if cd "apps/$ui"; then
-    docker rm -f "$ui" || true
-    case "$ui" in
-      user-ui)    port=3000 ;;
-      admin-ui)   port=3001 ;;
-      manager-ui) port=3002 ;;
-      vendor-ui)  port=3003 ;;
-      *) port=3010 ;; # fallback
-    esac
-    docker run -d --name "$ui" -p "$port:80" "$DOCKER_HUB_USERNAME/$ui:latest"
-    cd - > /dev/null
-  else
-    echo "⚠️ Directory apps/$ui not found. Skipping..."
-  fi
-done
+# # Deploy frontend services with fixed port mapping
+# echo "🎨 Deploying frontend services..."
+# for ui in $FRONTEND_SERVICES; do
+#   echo "➡️ Deploying frontend: $ui"
+#   if cd "apps/$ui"; then
+#     docker rm -f "$ui" || true
+#     case "$ui" in
+#       user-ui)    port=3000 ;;
+#       admin-ui)   port=3001 ;;
+#       manager-ui) port=3002 ;;
+#       vendor-ui)  port=3003 ;;
+#       *) port=3010 ;; # fallback
+#     esac
+#     docker run -d --name "$ui" -p "$port:80" "$DOCKER_HUB_USERNAME/$ui:latest"
+#     cd - > /dev/null
+#   else
+#     echo "⚠️ Directory apps/$ui not found. Skipping..."
+#   fi
+# done
 
-echo "✅ Deployment complete!"
+# echo "✅ Deployment complete!"

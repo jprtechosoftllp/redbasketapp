@@ -139,47 +139,47 @@ services:
     expose:
       - "3000"
 
-  # ---------- VENDOR UI ----------
-  vendor-ui:
-    build:
-      context: .
-      dockerfile: apps/vendor-ui/Dockerfile
-    image: durvesh502/meato-vendor-ui:latest
-    container_name: vendor-ui
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
-    restart: unless-stopped
-    expose:
-      - "3003"
+  # # ---------- VENDOR UI ----------
+  # vendor-ui:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/vendor-ui/Dockerfile
+  #   image: durvesh502/meato-vendor-ui:latest
+  #   container_name: vendor-ui
+  #   environment:
+  #     - NODE_ENV=production
+  #     - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
+  #   restart: unless-stopped
+  #   expose:
+  #     - "3003"
 
-  # ---------- MANAGER UI ----------
-  manager-ui:
-    build:
-      context: .
-      dockerfile: apps/manager-ui/Dockerfile
-    image: durvesh502/meato-manager-ui:latest
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
-    container_name: manager-ui
-    restart: unless-stopped
-    expose:
-      - "3002"
+  # # ---------- MANAGER UI ----------
+  # manager-ui:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/manager-ui/Dockerfile
+  #   image: durvesh502/meato-manager-ui:latest
+  #   environment:
+  #     - NODE_ENV=production
+  #     - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
+  #   container_name: manager-ui
+  #   restart: unless-stopped
+  #   expose:
+  #     - "3002"
 
-  # ---------- ADMIN UI ----------
-  admin-ui:
-    build:
-      context: .
-      dockerfile: apps/admin-ui/Dockerfile
-    image: durvesh502/meato-admin-ui:latest
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
-    container_name: admin-ui
-    restart: unless-stopped
-    expose:
-      - "3001"
+  # # ---------- ADMIN UI ----------
+  # admin-ui:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/admin-ui/Dockerfile
+  #   image: durvesh502/meato-admin-ui:latest
+  #   environment:
+  #     - NODE_ENV=production
+  #     - NEXT_PUBLIC_SERVER_URL=https://redbasketapp.hopto.org
+  #   container_name: admin-ui
+  #   restart: unless-stopped
+  #   expose:
+  #     - "3001"
 
 
   # # ---------- POSTGRESQL ----------
@@ -214,9 +214,9 @@ services:
     depends_on:
       - api-gateway
       - user-ui
-      - vendor-ui
-      - manager-ui
-      - admin-ui
+      # - vendor-ui
+      # - manager-ui
+      # - admin-ui
     # networks:
     #   - meato_net
 
