@@ -264,6 +264,7 @@ jobs:
 
               chmod +x scripts/deploy-production.sh
 
+              # Set environment variables
               export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
               export DOCKER_ACCESS_TOKEN="${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
 
