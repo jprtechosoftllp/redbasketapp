@@ -52,6 +52,19 @@ jobs:
             manager_service:
               - apps/manager-service/**
               - packages/backend/**
+            
+            admin_ui:
+              - apps/admin-ui/**
+              - packages/frontend/**
+            user_ui:
+              - apps/user-ui/**
+              - packages/frontend/**
+            vendor_ui:
+              - apps/vendor-ui/**
+              - packages/frontend/**
+            manager_ui:
+              - apps/manager-ui/**
+              - packages/frontend/**
 
       - name: Set matrix for changed services
         id: set-matrix
@@ -238,7 +251,7 @@ jobs:
            key: ${{ secrets.EC2_PRIVATE_KEY }}
            port: 22
            script: |
-              echo "🔧 Starting EC2 deployment..."
+              echo "Starting EC2 deployment..."
 
               # Navigate to app directory
               cd /home/ubuntu/meatobackend
@@ -266,7 +279,7 @@ jobs:
               # Run your deployment script (example)
               ./deploy.sh "$CHANGED_BACKEND" "$CHANGED_FRONTEND"
 
-                 echo "✅ Deployment completed."
+                 echo "Deployment completed."
 
   deploy-injection-service:
     name: Deploy Injection Backend & Frontend
@@ -295,7 +308,7 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 22
           script: |
-            echo "🚀 Deploying injection-service and injection-ui to EC2..."
+            echo "Deploying injection-service and injection-ui to EC2..."
 
             cd /home/ubuntu/meatobackend
 
@@ -308,4 +321,4 @@ jobs:
 
             ./deploy.sh "[\"$BACKEND_SERVICE\"]" "[\"$FRONTEND_SERVICE\"]"
 
-            echo "✅ injection-service and injection-ui deployment completed."
+            echo "injection-service and injection-ui deployment completed."
