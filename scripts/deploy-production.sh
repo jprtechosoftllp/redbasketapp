@@ -19,7 +19,7 @@ echo "🔧 Frontend services: $FRONTEND_SERVICES"
 
 # Login to Docker Hub
 echo "🔐 Logging into Docker Hub..."
-echo "$DOCKER_ACCESS_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_ACCESS_TOKEN"
 
 # Pull and restart backend services
 for SERVICE in $BACKEND_SERVICES; do
