@@ -111,7 +111,7 @@ const createProxyMiddleware = (serviceUrl: string, serviceName: string) => {
 
 // Proxy routes
 app.use('/admin', createProxyMiddleware(getServiceUrl('admin-service', 8083), 'admin-service'));
-app.use('/product', createProxyMiddleware(getServiceUrl('product-service', 8082), '/product-service'));
+app.use('/product', createProxyMiddleware(getServiceUrl('product-service', 8082), 'product-service'));
 app.use('/manager', createProxyMiddleware(getServiceUrl('manager-service', 8084), 'manager-service'));
 // app.use('/vendor', createProxyMiddleware(getServiceUrl('vendor-service', 8085), 'vendor-service'));
 app.use('/auth', createProxyMiddleware(getServiceUrl('auth-service', 8081), 'auth-service'));

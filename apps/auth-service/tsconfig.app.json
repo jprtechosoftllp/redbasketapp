@@ -4,7 +4,7 @@
     "outDir": "out-tsc/auth-srvice",
     "types": ["node"],
     "rootDir": "../../",
-    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"
+    "tsBuildInfoFile": "out-tsc/auth-srvice/tsconfig.app.tsbuildinfo"
   },
   "include": ["src/**/*.ts", "../../packages/backend/**/*.ts"],
   "exclude": [
