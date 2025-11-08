@@ -8,7 +8,6 @@ WORKDIR /app
 COPY apps/api-gateway/package.json ./
 COPY pnpm-workspace.yaml ./
 COPY pnpm-lock.yaml ./
-COPY tsconfig.json ./
 
 # Copy drizzle config
 COPY drizzle.config.ts ./
@@ -18,7 +17,7 @@ COPY packages/backend ./packages/backend
 
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --filter api-gateway... --prod --prefer-frozen-lockfile
+RUN pnpm install --prod
 
 # Generate and apply Drizzle migrations
 RUN npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
