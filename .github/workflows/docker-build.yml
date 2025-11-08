@@ -264,7 +264,7 @@ jobs:
 
               # ✅ Add these two lines here
               export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
-              export DOCKER_ACCESS_TOKEN="${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
+              export DOCKER_HUB_ACCESS_TOKEN="${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
 
               chmod +x scripts/deploy-production.sh
 
