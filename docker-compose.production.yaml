@@ -190,3 +190,7 @@ services:
       # - admin-ui
     # networks:
     #   - meato_net
+
+
+    # EC2 CLI
+    # docker-compose -f docker-compose.production.yaml up -d api-gateway

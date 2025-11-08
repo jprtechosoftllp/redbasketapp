@@ -1,4 +1,4 @@
-pacakges:
+packages:
   - apps/*
-  - pacakges/backend/*
-  - pacakges/frontend/*
+  - packages/backend/*
+  - packages/frontend/*

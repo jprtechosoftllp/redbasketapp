@@ -319,6 +319,57 @@ importers:
         specifier: ^5.1.4
         version: 5.1.4(webpack-dev-server@5.2.2)(webpack@5.102.1)
 
+  apps/admin-service:
+    dependencies:
+      express:
+        specifier: ^4.21.2
+        version: 4.21.2
+
+  apps/admin-service-e2e: {}
+
+  apps/admin-ui: {}
+
+  apps/api-gateway:
+    dependencies:
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      express:
+        specifier: ^4.21.2
+        version: 4.21.2
+
+  apps/api-gateway-e2e: {}
+
+  apps/auth-service:
+    dependencies:
+      express:
+        specifier: ^4.21.2
+        version: 4.21.2
+
+  apps/auth-service-e2e: {}
+
+  apps/manager-service:
+    dependencies:
+      express:
+        specifier: ^4.21.2
+        version: 4.21.2
+
+  apps/manager-service-e2e: {}
+
+  apps/manager-ui: {}
+
+  apps/product-service:
+    dependencies:
+      express:
+        specifier: ^4.21.2
+        version: 4.21.2
+
+  apps/product-service-e2e: {}
+
+  apps/user-ui: {}
+
+  apps/vendor-ui: {}
+
 packages:
 
   '@alloc/quick-lru@5.2.0':

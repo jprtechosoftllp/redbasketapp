@@ -1,8 +1,8 @@
 import express from 'express';
-// import cors from 'cors';
+import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import proxy from 'express-http-proxy';
 import dotenv from 'dotenv';
 import { createImage, removeImage } from './controllers/images';
@@ -41,7 +41,7 @@ const app = express();
 //   })
 // );
 
-// app.use(cors());
+app.use(cors());
 
 app.use(cookieParser());
 app.use(morgan(isProduction ? 'combined' : 'dev'));
@@ -57,7 +57,7 @@ app.use(
     standardHeaders: true,
     legacyHeaders: true,
     message: { error: 'Too many requests, please try again later.' },
-    keyGenerator: (req: any) => (req.user ? req.user.id : req.ip),
+    keyGenerator: (req: any) => (req.user ? req.user.id : ipKeyGenerator(req)), // ✅ safe fallback
     skip: (req) => req.path === '/',
   })
 );
