@@ -256,7 +256,7 @@ jobs:
            envs: DOCKER_HUB_USERNAME,DOCKER_ACCESS_TOKEN
            script: |
               echo "🚀 Starting EC2 deployment..."
-              cd /home/ubuntu/redbasketapp || exit 1
+              cd ~/redbasketapp || exit 1
 
               git stash --include-untracked || true
 
