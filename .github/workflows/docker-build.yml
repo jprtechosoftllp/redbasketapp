@@ -254,7 +254,7 @@ jobs:
               echo "Starting EC2 deployment..."
 
               # Navigate to app directory
-              cd /home/ubuntu/meatobackend
+              cd /home/ubuntu/redbasketapp
 
               # Configure Git to use personal access token
               git config --global url."https://${{ secrets.GH_ACCESS_TOKEN }}@github.com/" insteadOf "https://github.com/"
@@ -280,45 +280,3 @@ jobs:
               ./deploy.sh "$CHANGED_BACKEND" "$CHANGED_FRONTEND"
 
                  echo "Deployment completed."
-
-  deploy-injection-service:
-    name: Deploy Injection Backend & Frontend
-    needs: [detect-changes, build-backend, build-frontend]
-    runs-on: ubuntu-latest
-    environment: production
-    if: |
-      always() &&
-      github.ref == 'refs/heads/main' &&
-      github.event_name == 'push' &&
-      (
-        contains(needs.detect-changes.outputs.changed-backend, 'injection-service') ||
-        contains(needs.detect-changes.outputs.changed-frontend, 'injection-ui') ||
-        github.event.inputs.force_rebuild == 'true'
-      )
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Deploy Injection Backend & Frontend to EC2
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          port: 22
-          script: |
-            echo "Deploying injection-service and injection-ui to EC2..."
-
-            cd /home/ubuntu/meatobackend
-
-            git config --global url."https://${{ secrets.GH_ACCESS_TOKEN }}@github.com/" insteadOf "https://github.com/"
-            git pull origin main
-
-            export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
-            export BACKEND_SERVICE="injection-service"
-            export FRONTEND_SERVICE="injection-ui"
-
-            ./deploy.sh "[\"$BACKEND_SERVICE\"]" "[\"$FRONTEND_SERVICE\"]"
-
-            echo "injection-service and injection-ui deployment completed."
