@@ -6,7 +6,7 @@ echo "🚀 Starting production deployment..."
 
 # Ensure required environment variables are set
 : "${DOCKER_HUB_USERNAME:?❌ DOCKER_HUB_USERNAME is not set}"
-: "${DOCKER_ACCESS_TOKEN:?❌ DOCKER_ACCESS_TOKEN is not set}"
+: "${DOCKER_ACCESS_TOKEN:-}" || { echo "❌ DOCKER_ACCESS_TOKEN is not set"; exit 1; }
 
 # Parse JSON arrays passed as arguments
 BACKEND_SERVICES=$(echo "$1" | jq -r '.[]' || echo "")
