@@ -259,9 +259,9 @@ jobs:
               git stash --include-untracked || true
 
               # Configure GitHub token for pull
-               export GH_ACCESS_TOKEN="${{ secrets.GH_ACCESS_TOKEN }}"
-               git config --global url."https://${GH_ACCESS_TOKEN}@github.com/" insteadOf "https://github.com/"
-               git pull origin main || exit 1
+              export GH_ACCESS_TOKEN="${{ secrets.GH_ACCESS_TOKEN }}"
+              git config --global url."https://${GH_ACCESS_TOKEN}@github.com/" insteadOf "https://github.com/"
+              git pull origin main || exit 1
 
               # Ensure deploy script is executable
               chmod +x scripts/deploy-production.sh
@@ -276,9 +276,9 @@ jobs:
 
               # Fallback to full deploy if no changes
               if [ "$CHANGED_BACKEND" = "[]" ] && [ "$CHANGED_FRONTEND" = "[]" ]; then
-                echo "No changes detected — deploying all services"
-                CHANGED_BACKEND='["auth-service","product-service","admin-service","manager-service","api-gateway"]'
-                CHANGED_FRONTEND='["admin-ui","user-ui","vendor-ui","manager-ui"]'
+               echo "No changes detected — deploying all services"
+               CHANGED_BACKEND='["auth-service","product-service","admin-service","manager-service","api-gateway"]'
+               CHANGED_FRONTEND='["admin-ui","user-ui","vendor-ui","manager-ui"]'
               fi
 
               # Run deployment
