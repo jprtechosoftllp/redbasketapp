@@ -262,11 +262,11 @@ jobs:
               echo "https://${GH_ACCESS_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
               git pull origin main || exit 1
 
-              chmod +x scripts/deploy-production.sh
-
-              # Set environment variables
+              # ✅ Add these two lines here
               export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
               export DOCKER_ACCESS_TOKEN="${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
+
+              chmod +x scripts/deploy-production.sh
 
               CHANGED_BACKEND='${{ needs.detect-changes.outputs.changed-backend }}'
               CHANGED_FRONTEND='${{ needs.detect-changes.outputs.changed-frontend }}'
