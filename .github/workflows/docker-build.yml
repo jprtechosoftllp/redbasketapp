@@ -245,11 +245,15 @@ jobs:
 
        - name: Deploy to EC2
          uses: appleboy/ssh-action@v1.0.0
+         env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
          with:
            host: ${{ secrets.EC2_HOST }}
            username: ubuntu
            key: ${{ secrets.EC2_PRIVATE_KEY }}
            port: 22
+           envs: DOCKER_HUB_USERNAME,DOCKER_ACCESS_TOKEN
            script: |
               echo "🚀 Starting EC2 deployment..."
               cd /home/ubuntu/redbasketapp || exit 1
@@ -261,10 +265,6 @@ jobs:
               git config --global credential.helper store
               echo "https://${GH_ACCESS_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
               git pull origin main || exit 1
-
-              # ✅ Add these two lines here
-              export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
-              export DOCKER_HUB_ACCESS_TOKEN="${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
 
               chmod +x scripts/deploy-production.sh
 
