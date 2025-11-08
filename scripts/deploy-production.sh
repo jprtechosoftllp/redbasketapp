@@ -1,113 +1,100 @@
 #!/bin/bash
 
-set -euo pipefail  # Exit on error, undefined vars, or failed pipes
+set -euo pipefail
 
 echo "🚀 Starting production deployment..."
 
 # Ensure required environment variables are set
 : "${DOCKER_HUB_USERNAME:?❌ DOCKER_HUB_USERNAME is not set}"
-: "${DOCKER_HUB_PASSWORD:?❌ DOCKER_HUB_PASSWORD is not set}"
-: "${CHANGED_BACKEND:?❌ CHANGED_BACKEND is not set}"
-: "${CHANGED_FRONTEND:?❌ CHANGED_FRONTEND is not set}"
+: "${DOCKER_ACCESS_TOKEN:?❌ DOCKER_ACCESS_TOKEN is not set}"
+
+# Parse JSON arrays passed as arguments
+BACKEND_SERVICES=$(echo "$1" | jq -r '.[]')
+FRONTEND_SERVICES=$(echo "$2" | jq -r '.[]')
+
+DOCKER_USER="${DOCKER_HUB_USERNAME:-redbasketapp}"
+
+echo "🔧 Backend services: $BACKEND_SERVICES"
+echo "🔧 Frontend services: $FRONTEND_SERVICES"
 
 # Login to Docker Hub
 echo "🔐 Logging into Docker Hub..."
-echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
-
-# Convert JSON arrays to bash lists
-BACKEND_SERVICES=$(echo "$CHANGED_BACKEND" | jq -r '.[]?')
-FRONTEND_SERVICES=$(echo "$CHANGED_FRONTEND" | jq -r '.[]?')
+echo "$DOCKER_ACCESS_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
 
 # Pull and restart backend services
-if [ "$CHANGED_BACKEND" != "[]" ]; then
-  echo "🔄 Pulling and restarting changed backend services..."
-  for service in $BACKEND_SERVICES; do
-    echo "🚀 Updating backend: $service"
-    docker pull "$DOCKER_HUB_USERNAME/$service:latest"
-    docker stop "$service" || echo "Service $service not running"
-    docker rm "$service" || echo "Service $service not found"
-    docker run -d --name "$service" "$DOCKER_HUB_USERNAME/$service:latest"
-  done
-else
-  echo "✅ No backend changes detected."
-fi
+for SERVICE in $BACKEND_SERVICES; do
+  echo "📦 Updating backend: $SERVICE"
+  docker pull "$DOCKER_USER/$SERVICE:latest"
+  docker stop "$SERVICE" || true
+  docker rm "$SERVICE" || true
+  docker run -d \
+    --name "$SERVICE" \
+    --env-file .env \
+    --restart unless-stopped \
+    "$DOCKER_USER/$SERVICE:latest"
+done
 
 # Pull and restart frontend services
-if [ "$CHANGED_FRONTEND" != "[]" ]; then
-  echo "🔄 Pulling and restarting changed frontend services..."
-  for service in $FRONTEND_SERVICES; do
-    echo "🚀 Updating frontend: $service"
-    docker pull "$DOCKER_HUB_USERNAME/$service:latest"
-    docker stop "$service" || echo "Service $service not running"
-    docker rm "$service" || echo "Service $service not found"
-    docker run -d --name "$service" "$DOCKER_HUB_USERNAME/$service:latest"
-  done
-else
-  echo "✅ No frontend changes detected."
-fi
+for SERVICE in $FRONTEND_SERVICES; do
+  echo "🎨 Updating frontend: $SERVICE"
+  docker pull "$DOCKER_USER/$SERVICE:latest"
+  docker stop "$SERVICE" || true
+  docker rm "$SERVICE" || true
+  docker run -d \
+    --name "$SERVICE" \
+    --env-file .env \
+    --restart unless-stopped \
+    "$DOCKER_USER/$SERVICE:latest"
+done
 
 # Start/restart services using docker-compose
 echo "📦 Deploying services with docker-compose..."
-docker-compose -f docker-compose.production.yaml up -d
+docker-compose -f docker-compose.production.yaml up -d --remove-orphans
 
 # Health check function
-check_containers() {
-  local nginx_status=$(docker inspect -f '{{.State.Running}}' meato-nginx-1 2>/dev/null)
-  local gateway_status=$(docker inspect -f '{{.State.Running}}' meato-api-gateway-1 2>/dev/null)
-
-  if [ "$nginx_status" = "true" ] && [ "$gateway_status" = "true" ]; then
-    echo "✅ Both containers are running."
+check_health() {
+  local unhealthy=$(docker inspect --format='{{.Name}} {{.State.Health.Status}}' $(docker ps -q) | grep -v healthy || true)
+  if [ -z "$unhealthy" ]; then
     return 0
   else
-    echo "⚠️ One or both containers are not running."
+    echo "⚠️ Unhealthy containers detected:"
+    echo "$unhealthy"
     return 1
   fi
 }
 
+# Retry loop for health checks
+MAX_RETRIES=10
+RETRY_INTERVAL=5
 echo "⏳ Waiting for containers to be healthy..."
-# until check_containers; do
-#   sleep 5
-# done
+for ((i=1; i<=MAX_RETRIES; i++)); do
+  echo "🔍 Health check attempt $i/$MAX_RETRIES..."
+  if check_health; then
+    echo "✅ All containers are healthy."
+    break
+  fi
+  sleep $RETRY_INTERVAL
+done
 
-# # Deploy backend services with .env and fixed port mapping
-# echo "📦 Deploying backend services..."
-# for service in $BACKEND_SERVICES; do
-#   echo "➡️ Deploying backend: $service"
-#   if cd "apps/$service"; then
-#     docker rm -f "$service" || true
-#     case "$service" in
-#       api-gateway)   port=8080 ;;
-#       auth-service)  port=8081 ;;
-#       product-service) port=8082 ;;
-#       admin-service) port=8083 ;;
-#       manager-service) port=8084 ;;
-#       *) port=8090 ;; # fallback
-#     esac
-#     docker run -d --name "$service" --env-file .env -p "$port:$port" "$DOCKER_HUB_USERNAME/$service:latest"
-#     cd - > /dev/null
-#   else
-#     echo "⚠️ Directory apps/$service not found. Skipping..."
-#   fi
-# done
+if [ "$i" -gt "$MAX_RETRIES" ]; then
+  echo "❌ Some containers failed to become healthy after $MAX_RETRIES attempts."
+  exit 1
+fi
 
-# # Deploy frontend services with fixed port mapping
-# echo "🎨 Deploying frontend services..."
-# for ui in $FRONTEND_SERVICES; do
-#   echo "➡️ Deploying frontend: $ui"
-#   if cd "apps/$ui"; then
-#     docker rm -f "$ui" || true
-#     case "$ui" in
-#       user-ui)    port=3000 ;;
-#       admin-ui)   port=3001 ;;
-#       manager-ui) port=3002 ;;
-#       vendor-ui)  port=3003 ;;
-#       *) port=3010 ;; # fallback
-#     esac
-#     docker run -d --name "$ui" -p "$port:80" "$DOCKER_HUB_USERNAME/$ui:latest"
-#     cd - > /dev/null
-#   else
-#     echo "⚠️ Directory apps/$ui not found. Skipping..."
-#   fi
-# done
+# Reload Nginx if running and api-gateway is healthy
+if docker ps --format '{{.Names}}' | grep -q nginx-proxy; then
+  echo "🔁 nginx-proxy is running."
 
-# echo "✅ Deployment complete!"
+  gateway_health=$(docker inspect -f '{{.State.Health.Status}}' api-gateway 2>/dev/null || echo "not_found")
+
+  if [ "$gateway_health" = "healthy" ]; then
+    echo "✅ api-gateway is healthy. Reloading Nginx config..."
+    docker exec nginx-proxy nginx -t && docker exec nginx-proxy nginx -s reload
+  else
+    echo "⚠️ api-gateway is not healthy or not running — skipping Nginx reload"
+  fi
+else
+  echo "⚠️ nginx-proxy not running — skipping reload"
+fi
+
+echo "✅ Deployment complete."
