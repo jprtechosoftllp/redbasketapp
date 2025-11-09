@@ -13,15 +13,11 @@ COPY pnpm-lock.yaml ./
 COPY drizzle.config.ts ./
 
 # Copy workspace packages that api-gateway depends on
-COPY packages/backend ./packages/backend
+# COPY packages/backend ./packages/backend
 
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --prod
-
-# Generate and apply Drizzle migrations
-RUN npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
-RUN npx drizzle-kit push --config=drizzle.config.ts || echo "Skipping migration push"
+RUN pnpm install --filter @meato/api-gateway
 
 # Copy build application
 COPY apps/api-gateway/dist ./dist
