@@ -210,7 +210,7 @@ services:
     networks:
       - redbasket_net
 
-  networks:
+networks:
   redbasket_net:
     driver: bridge
 
