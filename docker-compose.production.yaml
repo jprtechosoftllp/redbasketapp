@@ -3,7 +3,6 @@ services:
   # ---------- API GATEWAY ----------
   api-gateway:
     image: redbasketapp/api-gateway:latest
-    container_name: api-gateway
     ports:
       - "8080:8080"  # ✅ Expose container port to host
     env_file:
@@ -27,7 +26,6 @@ services:
   # ---------- Auth Serivce ----------
   auth-service:
     image: redbasketapp/auth-service:latest
-    container_name: auth-service
     restart: unless-stopped
     env_file:
       - .env
@@ -49,7 +47,6 @@ services:
   # ---------- Product Serivce ----------
   product-service:
     image: redbasketapp/product-service:latest
-    container_name: product-service
     restart: unless-stopped
     env_file:
       - .env
@@ -71,7 +68,6 @@ services:
   # ---------- Admin Serivce ----------
   admin-service:
     image: redbasketapp/admin-service:latest
-    container_name: product-service
     restart: unless-stopped
     env_file:
     - .env
@@ -93,7 +89,6 @@ services:
   # ---------- Manager Serivce ----------
   manager-service:
     image: redbasketapp/manager-service:latest
-    container_name: manager-serrvice
     restart: unless-stopped
     env_file:
       - .env
@@ -115,7 +110,6 @@ services:
   # ---------- USER UI ----------
   user-ui:
     image: redbasketapp/user-ui:latest
-    container_name: user-ui
     env_file:
     - .env
     environment:
@@ -161,7 +155,6 @@ services:
   # ---------- ADMIN UI ----------
   admin-ui:
     image: redbasketapp/admin-ui:latest
-    container_name: admin-ui
     env_file:
     - .env
     environment:
@@ -197,7 +190,6 @@ services:
   # ---------- NGINX REVERSE PROXY ----------
   nginx:
     image: nginx:alpine
-    container_name: nginx
     restart: unless-stopped
     ports:
       - "80:80"
