@@ -25,32 +25,32 @@ docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_ACCESS_TOKEN"
 for SERVICE in $BACKEND_SERVICES; do
   echo "📦 Updating backend: $SERVICE"
   docker pull "$DOCKER_USER/$SERVICE:latest"
-  docker stop "$SERVICE" || true
-  docker rm "$SERVICE" || true
-  docker run -d \
-    --name "$SERVICE" \
-    --env-file .env \
-    --restart unless-stopped \
-    "$DOCKER_USER/$SERVICE:latest"
+  # docker stop "$SERVICE" || true
+  # docker rm "$SERVICE" || true
+  # docker run -d \
+  #   --name "$SERVICE" \
+  #   --env-file .env \
+  #   --restart unless-stopped \
+  #   "$DOCKER_USER/$SERVICE:latest"
 done
 
 # Pull and restart frontend services
 for SERVICE in $FRONTEND_SERVICES; do
   echo "🎨 Updating frontend: $SERVICE"
   docker pull "$DOCKER_USER/$SERVICE:latest"
-  docker stop "$SERVICE" || true
-  docker rm "$SERVICE" || true
-  docker run -d \
-    --name "$SERVICE" \
-    --env-file .env \
-    --restart unless-stopped \
-    "$DOCKER_USER/$SERVICE:latest"
+  # docker stop "$SERVICE" || true
+  # docker rm "$SERVICE" || true
+  # docker run -d \
+  #   --name "$SERVICE" \
+  #   --env-file .env \
+  #   --restart unless-stopped \
+  #   "$DOCKER_USER/$SERVICE:latest"
 done
 
 # Start/restart services using docker-compose
 if [ -f docker-compose.production.yaml ]; then
   echo "📦 Deploying services with docker-compose..."
-  docker-compose -f docker-compose.production.yaml up -d --remove-orphans
+  docker-compose -f docker-compose.production.yaml up -d
 else
   echo "⚠️ docker-compose.production.yaml not found — skipping compose deployment"
 fi
