@@ -211,8 +211,8 @@ services:
       - redbasket_net
 
   networks:
-    redbasket_net:
-      driver: bridge
+  redbasket_net:
+    driver: bridge
 
     # EC2 CLI
     # docker-compose -f docker-compose.production.yaml up -d api-gateway
