@@ -3,8 +3,6 @@ services:
   # ---------- API GATEWAY ----------
   api-gateway:
     image: redbasketapp/api-gateway:latest
-    ports:
-      - "8080:8080"  # ✅ Expose container port to host
     env_file:
       - .env
     restart: unless-stopped
