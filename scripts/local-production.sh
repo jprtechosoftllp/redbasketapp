@@ -21,7 +21,7 @@ declare -A SERVICES=(
   ["manager-service"]="8084"
   # ["vendor-service"]="8085"
   ["user-ui"]="3000"
-  # ["admin-ui"]="3001"
+  ["admin-ui"]="3001"
   # ["vendor-ui"]="3002"
   # ["manager-ui"]="3003"
 
