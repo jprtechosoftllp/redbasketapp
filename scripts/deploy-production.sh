@@ -4,58 +4,36 @@ set -euo pipefail
 
 echo "🚀 Starting production deployment..."
 
-# Ensure required environment variables are set
 : "${DOCKER_HUB_USERNAME:?❌ DOCKER_HUB_USERNAME is not set}"
 : "${DOCKER_ACCESS_TOKEN:-}" || { echo "❌ DOCKER_ACCESS_TOKEN is not set"; exit 1; }
 
-# Parse JSON arrays passed as arguments
 BACKEND_SERVICES=$(echo "$1" | jq -r '.[]' || echo "")
 FRONTEND_SERVICES=$(echo "$2" | jq -r '.[]' || echo "")
-
 DOCKER_USER="${DOCKER_HUB_USERNAME:-redbasketapp}"
 
 echo "🔧 Backend services: $BACKEND_SERVICES"
 echo "🔧 Frontend services: $FRONTEND_SERVICES"
 
-# Login to Docker Hub
 echo "🔐 Logging into Docker Hub..."
 docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_ACCESS_TOKEN"
 
-# Pull and restart backend services
 for SERVICE in $BACKEND_SERVICES; do
   echo "📦 Updating backend: $SERVICE"
   docker pull "$DOCKER_USER/$SERVICE:latest"
-  # docker stop "$SERVICE" || true
-  # docker rm "$SERVICE" || true
-  # docker run -d \
-  #   --name "$SERVICE" \
-  #   --env-file .env \
-  #   --restart unless-stopped \
-  #   "$DOCKER_USER/$SERVICE:latest"
 done
 
-# Pull and restart frontend services
 for SERVICE in $FRONTEND_SERVICES; do
   echo "🎨 Updating frontend: $SERVICE"
   docker pull "$DOCKER_USER/$SERVICE:latest"
-  # docker stop "$SERVICE" || true
-  # docker rm "$SERVICE" || true
-  # docker run -d \
-  #   --name "$SERVICE" \
-  #   --env-file .env \
-  #   --restart unless-stopped \
-  #   "$DOCKER_USER/$SERVICE:latest"
 done
 
-# Start/restart services using docker-compose
 if [ -f docker-compose.production.yaml ]; then
   echo "📦 Deploying services with docker-compose..."
-  docker-compose -f docker-compose.production.yaml up -d
+  docker-compose -f docker-compose.production.yaml up -d --force-recreate
 else
   echo "⚠️ docker-compose.production.yaml not found — skipping compose deployment"
 fi
 
-# Health check function
 check_health() {
   local unhealthy
   unhealthy=$(docker inspect --format='{{.Name}} {{.State.Health.Status}}' $(docker ps -q) 2>/dev/null | grep -v healthy || true)
@@ -68,7 +46,6 @@ check_health() {
   fi
 }
 
-# Retry loop for health checks
 MAX_RETRIES=10
 RETRY_INTERVAL=5
 echo "⏳ Waiting for containers to be healthy..."
@@ -86,12 +63,9 @@ if (( i > MAX_RETRIES )); then
   exit 1
 fi
 
-# Reload Nginx if running and api-gateway is healthy
 if docker ps --format '{{.Names}}' | grep -q '^nginx-proxy$'; then
   echo "🔁 nginx-proxy is running."
-
   gateway_health=$(docker inspect -f '{{.State.Health.Status}}' api-gateway 2>/dev/null || echo "not_found")
-
   if [ "$gateway_health" = "healthy" ]; then
     echo "✅ api-gateway is healthy. Reloading Nginx config..."
     docker exec nginx-proxy nginx -t && docker exec nginx-proxy nginx -s reload

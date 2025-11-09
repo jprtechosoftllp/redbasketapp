@@ -6,14 +6,17 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10.18.2 --activate
 
 # Copy root + workspace configs
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+COPY tsconfig.json ./
 
 # Copy only required package manifests
 COPY apps/user-ui/package.json ./apps/user-ui/
 COPY packages/frontend ./packages/frontend
 
-# Install all dependencies (workspace-aware)
-RUN pnpm install --filter user-ui... --frozen-lockfile
+# Install only production dependencies for user-ui
+RUN pnpm install --prod --filter user-ui...
 
 # 🧩 Ensure node_modules exists (even if only partial)
 RUN mkdir -p /app/node_modules
@@ -31,7 +34,12 @@ COPY --from=deps /app/packages/frontend ./packages/frontend
 
 
 # Copy only essential workspace configuration files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml nx.json tsconfig.base.json tsconfig.json ./
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+COPY nx.json ./
+COPY tsconfig.base.json ./
+COPY tsconfig.json ./
 # ✅ Ensure Nx CLI and workspace tools are available
 
 
