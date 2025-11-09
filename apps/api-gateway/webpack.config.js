@@ -8,7 +8,7 @@ module.exports = {
       devtoolModuleFilenameTemplate: '[absolute-resource-path]',
     }),
   },
-   resolve: {
+  resolve: {
     alias: {
       '@packages/backend': resolve(__dirname, '../../packages/backend'),
     },
@@ -20,7 +20,6 @@ module.exports = {
       compiler: 'tsc',
       main: './src/main.ts',
       tsConfig: './tsconfig.app.json',
-      assets: ['./src/assets'],
       optimization: false,
       outputHashing: 'none',
       generatePackageJson: true,

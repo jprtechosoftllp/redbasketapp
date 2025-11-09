@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import proxy from 'express-http-proxy';
 import dotenv from 'dotenv';
-import { createImage, removeImage } from './controllers/images';
+// import { createImage, removeImage } from './controllers/images';
 dotenv.config();
 
 const port = process.env.API_GATEWAY_PORT ? Number(process.env.API_GATEWAY_PORT) : 8080;
@@ -71,8 +71,8 @@ app.get('/gateway-health', (req, res) => {
   });
 });
 
-app.post('/upload-image', createImage);
-app.delete('/delete-image', removeImage)
+// app.post('/upload-image', createImage);
+// app.delete('/delete-image', removeImage)
 
 // app.use('/auth', proxy('http://localhost:8081')); // Proxy all requests to the URL
 // app.use('/product', proxy('http://localhost:8082')); // Proxy all requests to the URL

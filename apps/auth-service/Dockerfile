@@ -19,11 +19,6 @@ COPY packages/backend ./packages/backend
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN pnpm install --prod --prefer-frozen-lockfile
-RUN pnpm add cookie-parser tslib express
-
-
-# Ensure drizzle-kit is available
-RUN pnpm add -D drizzle-kit
 
 # Generate and apply Drizzle migrations
 RUN npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
