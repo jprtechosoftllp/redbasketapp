@@ -87,7 +87,7 @@ if (( i > MAX_RETRIES )); then
 fi
 
 # Reload Nginx if running and api-gateway is healthy
-if docker ps --format '{{.Status}}' | grep -q '^nginx-proxy$'; then
+if docker ps --format '{{.Names}}' | grep -q '^nginx-proxy$'; then
   echo "🔁 nginx-proxy is running."
 
   gateway_health=$(docker inspect -f '{{.State.Health.Status}}' api-gateway 2>/dev/null || echo "not_found")
