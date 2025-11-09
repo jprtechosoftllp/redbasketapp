@@ -109,6 +109,7 @@
     "cookie-parser": "^1.4.7",
     "morgan": "^1.10.1",
     "express-rate-limit": "^6.7.0",
+    "express-http-proxy": "^2.1.2",
     "jsonwebtoken": "^9.0.2"
   }
 }
