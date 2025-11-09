@@ -16,14 +16,11 @@ COPY packages/backend ./packages/backend
 
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --prod
-
-# Ensure drizzle-kit is available
-RUN pnpm add -D drizzle-kit
+RUN pnpm install --filter @meato/product-service...
 
 # Generate and apply Drizzle migrations
-RUN npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
-RUN npx drizzle-kit push --config=drizzle.config.ts || echo "Skipping migration push"
+RUN pnpm drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
+RUN pnpm drizzle-kit push --config=drizzle.config.ts || echo "Skipping migration push"
 
 # Copy build application
 COPY apps/product-service/dist ./dist
@@ -43,7 +40,7 @@ WORKDIR /app
 # Copy files from bulider stage
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nodejs:nodejs /app/package.json ./dist/package.json
 COPY --from=builder --chown=nodejs:nodejs /app/drizzle.config.ts ./drizzle.config.ts
 
 #Switch to non-root user

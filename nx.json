@@ -65,6 +65,7 @@
         "apps/admin-service-e2e/**/*",
         "apps/manager-service-e2e/**/*",
         "apps/product-service-e2e/**/*",
+        "apps/api-gateway-e2e/**/*",
         "apps/api-gateway-e2e/**/*"
       ]
     },

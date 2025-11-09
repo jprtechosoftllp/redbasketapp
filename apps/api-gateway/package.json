@@ -4,43 +4,6 @@
   "private": true,
   "nx": {
     "targets": {
-      "build": {
-        "executor": "@nx/esbuild:esbuild",
-        "outputs": [
-          "{options.outputPath}"
-        ],
-        "defaultConfiguration": "production",
-        "options": {
-          "platform": "node",
-          "outputPath": "apps/api-gateway/dist",
-          "format": [
-            "cjs"
-          ],
-          "bundle": false,
-          "main": "apps/api-gateway/src/main.ts",
-          "tsConfig": "apps/api-gateway/tsconfig.app.json",
-          "assets": [
-            "apps/api-gateway/src/assets"
-          ],
-          "esbuildOptions": {
-            "sourcemap": true,
-            "outExtension": {
-              ".js": ".js"
-            }
-          }
-        },
-        "configurations": {
-          "development": {},
-          "production": {
-            "esbuildOptions": {
-              "sourcemap": false,
-              "outExtension": {
-                ".js": ".js"
-              }
-            }
-          }
-        }
-      },
       "prune-lockfile": {
         "dependsOn": [
           "build"
@@ -103,13 +66,6 @@
     }
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "cookie-parser": "^1.4.7",
-    "morgan": "^1.10.1",
-    "express-rate-limit": "^6.7.0",
-    "express-http-proxy": "^2.1.2",
-    "jsonwebtoken": "^9.0.2"
+    "express": "^4.21.2"
   }
 }
