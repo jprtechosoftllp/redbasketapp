@@ -21,6 +21,8 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
+    networks:
+      - redbasket_net
 
   # ---------- Auth Serivce ----------
   auth-service:
@@ -41,6 +43,8 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
+    networks:
+      - redbasket_net
 
   # ---------- Product Serivce ----------
   product-service:
@@ -61,6 +65,8 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
+    networks:
+      - redbasket_net
 
   # ---------- Admin Serivce ----------
   admin-service:
@@ -81,6 +87,8 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
+    networks:
+      - redbasket_net
   
   # ---------- Manager Serivce ----------
   manager-service:
@@ -101,6 +109,8 @@ services:
         limits:
           memory: 512M
           cpus: '0.5'
+    networks:
+      - redbasket_net
 
   # ---------- USER UI ----------
   user-ui:
@@ -117,6 +127,8 @@ services:
         limits:
           memory: 512M
           cpus: '0.3'
+    networks:
+      - redbasket_net
 
   # # ---------- VENDOR UI ----------
   # vendor-ui:
@@ -161,6 +173,8 @@ services:
         limits:
           memory: 512M
           cpus: '0.3'
+    networks:
+      - redbasket_net
 
   # # ---------- POSTGRESQL ----------
   # db:
@@ -199,6 +213,11 @@ services:
       # - vendor-ui
       # - manager-ui
       - admin-ui
+    networks:
+      - redbasket_net
 
+networks:
+  redbasket_net:
+    driver: bridge
     # EC2 CLI
     # docker-compose -f docker-compose.production.yaml up -d api-gateway
