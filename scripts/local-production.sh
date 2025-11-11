@@ -60,7 +60,7 @@ build_image() {
   # Optional: Push to Docker Hub
   if [ "$PUSH" == "true" ]; then
     echo -e "${BLUE}📦 Pushing ${image_name}:latest to Docker Hub...${NC}"
-    docker push "${image_name}:latest"
+    docker push "redbasketapp/${image_name}:latest"
     echo -e "${GREEN}✅ Image pushed to Docker Hub!${NC}"
   fi
 }
