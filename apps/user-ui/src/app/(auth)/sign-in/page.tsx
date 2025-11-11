@@ -50,6 +50,8 @@ export default function page() {
                 const { data } = await axios.post(
                     `${process.env.NEXT_PUBLIC_SERVER_URL!}/auth/user/${url}`, { countryCode, phone, otp }
                 );
+                console.log(data);
+                
                 return data
             } catch (error: any) {
                 // Optional: Extract error info before rethrowing
