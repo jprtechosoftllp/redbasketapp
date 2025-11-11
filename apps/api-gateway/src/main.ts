@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+// import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
@@ -41,7 +41,7 @@ const app = express();
 //   })
 // );
 
-app.use(cors());
+// app.use(cors());
 
 app.use(cookieParser());
 app.use(morgan(isProduction ? 'combined' : 'dev'));
