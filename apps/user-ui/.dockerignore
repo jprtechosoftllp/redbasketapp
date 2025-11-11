@@ -1,32 +1,6 @@
-# Node modules and lockfiles
 node_modules
-.pnpm-store
-*.log
-
-# Build output
-.next
-out
 dist
-
-# Local env and config
-.env*
-.env.local
-.env.development
-.env.test
-.env.production
-
-# OS and editor artifacts
-.DS_Store
-Thumbs.db
-.vscode
-.idea
-
-# Git and version control
+.nx
+.turbo
 .git
-.gitignore
-
-# Nx and monorepo extras (if applicable)
-tmp
-coverage
-nx-report.json
-project-graph.json
+.env

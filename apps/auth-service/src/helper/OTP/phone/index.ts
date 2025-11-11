@@ -1,8 +1,8 @@
 import { NextFunction } from "express";
 import crypto from 'crypto';
-import twilio from 'twilio'
 import { ValidationError } from "@packages/backend/errors";
 import redis from "@packages/backend/db/redis";
+import axios from 'axios';
 
 export const otpRestrictionsPhone = async (phone: Number, next: NextFunction) => {
     try {
@@ -35,24 +35,21 @@ export const otpRestrictionsPhone = async (phone: Number, next: NextFunction) =>
 export const senNumberdOTPPhone = async (phone: Number, next: NextFunction) => {
     try {
         const otp = crypto.randomInt(1000, 9999).toString();
-        const formattedPhone = '+91' + phone.toString();
 
         await redis.set(`otp_cooldown:${phone}`, "true", "EX", 60) // otp send agian after one minute
 
-        // await redis.set(`otp_cooldown:${phone}`, "true", "EX", 60) // otp send agian after one minute
-        // Your AccountSID and Auth Token from console.twilio.com
-        const accountSid = process.env.TWILIO_ACCOUNT_SID!;
-        const authToken = process.env.TWILIO_ACCOUNT_AUTH_TOKEN!;
-
-        const client = twilio(accountSid, authToken);
-
-        client.messages
-            .create({
-                body: `Hello from twilio-node ${otp}`,
-                to: formattedPhone, // Text your number
-                from: process.env.TWILIO_PHONE_NUMBER!, // From a valid Twilio number
-            })
-            .then((message: any) => console.log(message.sid));
+        await axios.get("https://www.fast2sms.com/dev/bulkV2", {
+            params: {
+                authorization: process.env.OTP_FAST2SMS_API_KEY, // use env var for safety
+                route: process.env.OTP_ROUTE,
+                sender_id: process.env.OTP_SENDER_ID,
+                message: process.env.OTP_MESSAGE,
+                variables_values: otp,
+                flash: 0,
+                numbers: phone,
+                schedule_time: '',
+            },
+        });
 
         await redis.set(`otp:${phone}`, otp, "EX", 300);  // otp valid for 5 minutes
 
@@ -81,7 +78,7 @@ export const teackOtpRequestPhone = async (phone: Number, next: NextFunction) =>
     }
 }
 
-export const verifyOTPPhone = async (phone: Number, otp: string, next: NextFunction ) => {
+export const verifyOTPPhone = async (phone: Number, otp: string, next: NextFunction) => {
     try {
         const storedOtp = await redis.get(`otp:${phone}`);
 
@@ -107,7 +104,7 @@ export const verifyOTPPhone = async (phone: Number, otp: string, next: NextFunct
             );
         };
 
-            await redis.del(`otp:${phone}`, failedOtpKey);
+        await redis.del(`otp:${phone}`, failedOtpKey);
 
         return true;
     } catch (error) {
@@ -115,3 +112,5 @@ export const verifyOTPPhone = async (phone: Number, otp: string, next: NextFunct
         return next(error)
     }
 }
+
+// https://www.fast2sms.com/dev/bulkV2?authorization=X9oMRUQTPd7z4LNSgVvjyekFiEWufnIq6c3HDbwA8tYhZsK02a7qH8COV03E6wADJlBdXhfQcFYjMevI&route=dlt&sender_id=JPRTCH&message=189415&variables_values={otp}&flash=0&numbers={number}&schedule_time= 

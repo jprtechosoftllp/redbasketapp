@@ -24,7 +24,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
-        let { name, value, type } = e.target as HTMLInputElement | HTMLSelectElement;
+        const { name, value, type } = e.target as HTMLInputElement | HTMLSelectElement;
 
         let checked: boolean | undefined;
         if (type === 'checkbox' && 'checked' in e.target) {

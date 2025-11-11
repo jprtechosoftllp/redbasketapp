@@ -8,7 +8,7 @@
   "nx": {
     "name": "@meato/manager-service",
     "projectType": "application",
-    "sourceRoot": "@meato/manager-service/src",
+    "sourceRoot": "apps/manager-service/src",
     "targets": {
       "serve": {
         "continuous": true,

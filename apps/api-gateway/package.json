@@ -8,7 +8,7 @@
   "nx": {
     "name": "@meato/api-gateway",
     "projectType": "application",
-    "sourceRoot": "@meato/api-gateway/src",
+    "sourceRoot": "apps/api-gateway/src",
     "targets": {
       "serve": {
         "continuous": true,

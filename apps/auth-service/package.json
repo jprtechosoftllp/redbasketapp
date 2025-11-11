@@ -8,7 +8,7 @@
   "nx": {
     "name": "@meato/auth-service",
     "projectType": "application",
-    "sourceRoot": "@meato/auth-service/src",
+    "sourceRoot": "apps/auth-service/src",
     "targets": {
       "serve": {
         "continuous": true,
@@ -49,6 +49,6 @@
     "jsonwebtoken": "9.0.2",
     "nodemailer": "7.0.10",
     "tslib": "^2.8.1",
-    "twilio": "5.10.4"
+    "axios": "^1.6.0"
   }
 }
