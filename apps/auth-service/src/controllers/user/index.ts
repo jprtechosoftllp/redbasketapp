@@ -103,9 +103,9 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
         };
 
         // Check OTP restrictions
-        await otpRestrictionsPhone(Number(phone), next);
+        await otpRestrictionsPhone(phone, next);
         // track OTP request count
-        await teackOtpRequestPhone(Number(phone), next);
+        await teackOtpRequestPhone(phone, next);
 
         // Call function to send OTP
         await senNumberdOTPPhone(phone, next);

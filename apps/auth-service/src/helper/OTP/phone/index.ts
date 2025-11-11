@@ -36,6 +36,8 @@ export const senNumberdOTPPhone = async (phone: Number, next: NextFunction) => {
     try {
         const otp = crypto.randomInt(1000, 9999).toString();
 
+        otpRestrictionsPhone(phone, next)
+
         await redis.set(`otp_cooldown:${phone}`, "true", "EX", 60) // otp send agian after one minute
 
         await axios.get("https://www.fast2sms.com/dev/bulkV2", {
