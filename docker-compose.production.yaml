@@ -3,7 +3,6 @@ services:
   # ---------- API GATEWAY ----------
   api-gateway:
     image: redbasketapp/api-gateway:latest
-    container_name: api-gateway
     env_file:
       - .env
     restart: unless-stopped
@@ -26,7 +25,6 @@ services:
   auth-service:
     image: redbasketapp/auth-service:latest
     restart: unless-stopped
-    container_name: auth-service
     env_file:
       - .env
     environment:
@@ -48,7 +46,6 @@ services:
   product-service:
     image: redbasketapp/product-service:latest
     restart: unless-stopped
-    container_name: product-service
     env_file:
       - .env
     environment:
@@ -70,7 +67,6 @@ services:
   admin-service:
     image: redbasketapp/admin-service:latest
     restart: unless-stopped
-    container_name: admin-service
     env_file:
     - .env
     environment:
@@ -91,7 +87,6 @@ services:
   # ---------- Manager Serivce ----------
   manager-service:
     image: redbasketapp/manager-service:latest
-    container_name: manager-service
     restart: unless-stopped
     env_file:
       - .env
@@ -113,7 +108,6 @@ services:
   # ---------- USER UI ----------
   user-ui:
     image: redbasketapp/user-ui:latest
-    container_name: user-ui
     env_file:
     - .env
     environment:
@@ -159,7 +153,6 @@ services:
   # ---------- ADMIN UI ----------
   admin-ui:
     image: redbasketapp/admin-ui:latest
-    container_name: admin-ui
     env_file:
     - .env
     environment:
