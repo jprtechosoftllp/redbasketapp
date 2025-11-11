@@ -62,8 +62,6 @@ app.use(
   })
 );
 
-
-
 // app.post('/upload-image', createImage);
 // app.delete('/delete-image', removeImage)
 
@@ -103,20 +101,11 @@ const createProxyMiddleware = (serviceUrl: string, serviceName: string) => {
 };
 
 // Proxy routes
-app.use('/api/admin', createProxyMiddleware(getServiceUrl('admin-service', 8083), 'admin-service'));
-app.use('/api/product', createProxyMiddleware(getServiceUrl('product-service', 8082), 'product-service'));
-app.use('/api/manager', createProxyMiddleware(getServiceUrl('manager-service', 8084), 'manager-service'));
+app.use('/admin', createProxyMiddleware(getServiceUrl('admin-service', 8083), 'admin-service'));
+app.use('/product', createProxyMiddleware(getServiceUrl('product-service', 8082), 'product-service'));
+app.use('/manager', createProxyMiddleware(getServiceUrl('manager-service', 8084), 'manager-service'));
 // app.use('/vendor', createProxyMiddleware(getServiceUrl('vendor-service', 8085), 'vendor-service'));
-app.use('/api/auth', createProxyMiddleware(getServiceUrl('auth-service', 8081), 'auth-service'));
-
-// Health check
-app.get('/api/gateway-health', (req, res) => {
-  res.status(200).json({
-    message: 'API Gateway is healthy',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-  });
-});
+app.use('/auth', createProxyMiddleware(getServiceUrl('auth-service', 8081), 'auth-service'));
 
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -127,6 +116,15 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
       timestamp: new Date().toISOString(),
     });
   }
+});
+
+// Health check
+app.get('/gateway-health', (req, res) => {
+  res.status(200).json({
+    message: 'API Gateway is healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+  });
 });
 
 // 404 handler
