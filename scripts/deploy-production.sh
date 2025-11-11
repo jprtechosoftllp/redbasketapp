@@ -6,7 +6,7 @@ echo "🚀 Starting production deployment..."
 
 # Ensure required environment variables are set
 : "${DOCKER_HUB_USERNAME:?❌ DOCKER_HUB_USERNAME is not set}"
-: "${DOCKER_ACCESS_TOKEN:-}" || { echo "❌ DOCKER_ACCESS_TOKEN is not set"; exit 1; }
+: "${DOCKER_ACCESS_TOKEN:?❌ DOCKER_ACCESS_TOKEN is not set}"
 
 # Parse JSON arrays passed as arguments
 BACKEND_SERVICES=$(echo "$1" | jq -r '.[]' || echo "")
@@ -19,38 +19,24 @@ echo "🔧 Frontend services: $FRONTEND_SERVICES"
 
 # Login to Docker Hub
 echo "🔐 Logging into Docker Hub..."
-docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_ACCESS_TOKEN"
+echo "$DOCKER_ACCESS_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
 
-# Pull and restart backend services
+# Pull backend services
 for SERVICE in $BACKEND_SERVICES; do
   echo "📦 Updating backend: $SERVICE"
   docker pull "$DOCKER_USER/$SERVICE:latest"
-  # docker stop "$SERVICE" || true
-  # docker rm "$SERVICE" || true
-  # docker run -d \
-  #   --name "$SERVICE" \
-  #   --env-file .env \
-  #   --restart unless-stopped \
-  #   "$DOCKER_USER/$SERVICE:latest"
 done
 
-# Pull and restart frontend services
+# Pull frontend services
 for SERVICE in $FRONTEND_SERVICES; do
   echo "🎨 Updating frontend: $SERVICE"
   docker pull "$DOCKER_USER/$SERVICE:latest"
-  # docker stop "$SERVICE" || true
-  # docker rm "$SERVICE" || true
-  # docker run -d \
-  #   --name "$SERVICE" \
-  #   --env-file .env \
-  #   --restart unless-stopped \
-  #   "$DOCKER_USER/$SERVICE:latest"
 done
 
-# Start/restart services using docker-compose
+# Start/restart services using docker compose (v2)
 if [ -f docker-compose.production.yaml ]; then
-  echo "📦 Deploying services with docker-compose..."
-  docker-compose -f docker-compose.production.yaml up -d --force-recreate
+  echo "📦 Deploying services with docker compose..."
+  docker compose -f docker-compose.production.yaml up -d --build --no-deps
 else
   echo "⚠️ docker-compose.production.yaml not found — skipping compose deployment"
 fi
