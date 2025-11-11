@@ -16,7 +16,7 @@ COPY packages/backend ./packages/backend
 
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --filter @meato/product-service...
+RUN pnpm install --prod --filter @meato/product-service...
 
 # Generate and apply Drizzle migrations
 RUN pnpm drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"

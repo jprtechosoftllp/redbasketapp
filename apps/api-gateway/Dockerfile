@@ -17,7 +17,7 @@ COPY drizzle.config.ts ./
 
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --filter @meato/api-gateway...
+RUN pnpm install --prod --filter api-gateway...
 
 # Copy build application
 COPY apps/api-gateway/dist ./dist
@@ -37,7 +37,9 @@ WORKDIR /app
 # Copy files from bulider stage
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/package.json ./dist/package.json
+COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
+
+# Optional: drizzle.config.ts if needed at runtime
 COPY --from=builder --chown=nodejs:nodejs /app/drizzle.config.ts ./drizzle.config.ts
 
 #Switch to non-root user

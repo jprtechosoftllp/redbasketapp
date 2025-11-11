@@ -2,42 +2,14 @@
   "name": "@meato/manager-service",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "dev": "ts-node --esm src/main.ts"
+  },
   "nx": {
+    "name": "@meato/manager-service",
+    "projectType": "application",
+    "sourceRoot": "@meato/manager-service/src",
     "targets": {
-      "prune-lockfile": {
-        "dependsOn": [
-          "build"
-        ],
-        "cache": true,
-        "executor": "@nx/js:prune-lockfile",
-        "outputs": [
-          "{workspaceRoot}/apps/mangaer-service/dist/package.json",
-          "{workspaceRoot}/apps/mangaer-service/dist/package-lock.json"
-        ],
-        "options": {
-          "buildTarget": "build"
-        }
-      },
-      "copy-workspace-modules": {
-        "dependsOn": [
-          "build"
-        ],
-        "cache": true,
-        "outputs": [
-          "{workspaceRoot}/apps/mangaer-service/dist/workspace_modules"
-        ],
-        "executor": "@nx/js:copy-workspace-modules",
-        "options": {
-          "buildTarget": "build"
-        }
-      },
-      "prune": {
-        "dependsOn": [
-          "prune-lockfile",
-          "copy-workspace-modules"
-        ],
-        "executor": "nx:noop"
-      },
       "serve": {
         "continuous": true,
         "executor": "@nx/js:node",
@@ -66,6 +38,14 @@
     }
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "cookie-parser": "1.4.7",
+    "cors": "2.8.5",
+    "dotenv": "17.2.3",
+    "express": "^4.21.2",
+    "drizzle-orm": "^0.44.7",
+    "morgan": "1.10.1",
+    "pg": "^8.16.3",
+    "tslib": "^2.3.0"
   }
 }
+

@@ -1,0 +1,35 @@
+# Ignore node_modules everywhere
+**/node_modules
+.pnpm-store
+.pnp.*
+.pnpm-debug.log
+
+# Ignore Nx build artifacts
+.nx
+coverage
+
+# Ignore local environment and config files
+.env
+.env.local
+.env.*.local
+
+# Ignore editor and OS clutter
+*.log
+*.swp
+*.swo
+*.DS_Store
+*.idea/
+*.vscode/
+*.history/
+
+# Ignore test files and snapshots
+**/*.spec.ts
+**/*.test.ts
+**/__tests__/
+**/__mocks__/
+**/__snapshots__/
+
+# Ignore TypeScript source if you're only copying dist
+apps/manager-service/src/
+tsconfig.json
+tsconfig.*.json

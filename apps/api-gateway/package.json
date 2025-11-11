@@ -2,42 +2,14 @@
   "name": "@meato/api-gateway",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "dev": "ts-node --esm src/main.ts"
+  },
   "nx": {
+    "name": "@meato/api-gateway",
+    "projectType": "application",
+    "sourceRoot": "@meato/api-gateway/src",
     "targets": {
-      "prune-lockfile": {
-        "dependsOn": [
-          "build"
-        ],
-        "cache": true,
-        "executor": "@nx/js:prune-lockfile",
-        "outputs": [
-          "{workspaceRoot}/apps/api-gateway/dist/package.json",
-          "{workspaceRoot}/apps/api-gateway/dist/pnpm-lock.yaml"
-        ],
-        "options": {
-          "buildTarget": "build"
-        }
-      },
-      "copy-workspace-modules": {
-        "dependsOn": [
-          "build"
-        ],
-        "cache": true,
-        "outputs": [
-          "{workspaceRoot}/apps/api-gateway/dist/workspace_modules"
-        ],
-        "executor": "@nx/js:copy-workspace-modules",
-        "options": {
-          "buildTarget": "build"
-        }
-      },
-      "prune": {
-        "dependsOn": [
-          "prune-lockfile",
-          "copy-workspace-modules"
-        ],
-        "executor": "nx:noop"
-      },
       "serve": {
         "continuous": true,
         "executor": "@nx/js:node",
@@ -66,6 +38,13 @@
     }
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "cookie-parser": "1.4.7",
+    "cors": "2.8.5",
+    "dotenv": "17.2.3",
+    "express": "^4.21.2",
+    "express-http-proxy": "2.1.2",
+    "express-rate-limit": "8.2.1",
+    "morgan": "1.10.1",
+    "tslib": "^2.3.0"
   }
 }

@@ -1,69 +1,57 @@
-# ---------- DEPS STAGE ----------
-FROM node:22-alpine AS deps
+# ---------- Builder Stage ----------
+FROM node:20-alpine AS builder
+
 WORKDIR /app
 
 # Enable pnpm
-RUN corepack enable && corepack prepare pnpm@10.18.2 --activate
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy root + workspace configs
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-COPY pnpm-workspace.yaml ./
-COPY tsconfig.json ./
+# Copy only essential files for install
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY apps/user-ui/package.json ./apps/user-ui/package.json
+COPY packages/frontend/package.json ./packages/frontend/package.json
 
-# Copy only required package manifests
-COPY apps/user-ui/package.json ./apps/user-ui/
-COPY packages/frontend ./packages/frontend
+# Install only what's needed for user-ui and its deps (like frontend)
+RUN pnpm install --frozen-lockfile --filter user-ui...
 
-# Install only production dependencies for user-ui
+# Copy full source for build
+COPY apps ./apps
+COPY packages ./packages
+COPY tsconfig.base.json nx.json ./
+
+# Build the Next.js app
+RUN pnpm nx build user-ui
+
+---
+
+# ---------- Runtime Stage ----------
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy only what's needed to run
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-lock.yaml ./
+COPY --from=builder /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/.npmrc ./
+COPY --from=builder /app/apps/user-ui/package.json ./apps/user-ui/package.json
+COPY --from=builder /app/packages/frontend/package.json ./packages/frontend/package.json
+
+# Install production deps for user-ui and frontend
 RUN pnpm install --prod --filter user-ui...
 
-# 🧩 Ensure node_modules exists (even if only partial)
-RUN mkdir -p /app/node_modules
+# Copy built output and public assets
+COPY --from=builder /app/dist/apps/user-ui ./.next
+COPY --from=builder /app/apps/user-ui/public ./public
+COPY --from=builder /app/apps/user-ui/next.config.js ./
 
-# ---------- BUILD STAGE ----------
-FROM node:22-alpine AS builder
-WORKDIR /app
-
-RUN corepack enable && corepack prepare pnpm@10.18.2 --activate
-
-# Copy all dependencies from deps
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/package.json ./package.json
-COPY --from=deps /app/packages/frontend ./packages/frontend
-
-
-# Copy only essential workspace configuration files
-COPY package.json ./
-COPY pnpm-lock.yaml ./
-COPY pnpm-workspace.yaml ./
-COPY nx.json ./
-COPY tsconfig.base.json ./
-COPY tsconfig.json ./
-# ✅ Ensure Nx CLI and workspace tools are available
-
-
-# Copy user-ui source code
-COPY apps/user-ui ./apps/user-ui
-
-# # Build using Nx
-# RUN npx nx build user-ui
-
-# ---------- RUNNER STAGE ----------
-FROM node:22-alpine AS runner
-WORKDIR /app
+# Set environment variables
 ENV NODE_ENV=production
-
-# Copy production dependencies only (root)
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy built app & required assets
-COPY --from=builder /app/apps/user-ui/.next ./apps/user-ui/.next
-COPY --from=builder /app/apps/user-ui/public ./apps/user-ui/public
-COPY --from=builder /app/apps/user-ui/package.json ./apps/user-ui/package.json
+ENV PORT=3000
 
 EXPOSE 3000
 
-USER node
-
-CMD ["pnpm", "--filter", "user-ui", "start"]
+CMD ["pnpm", "start", "--filter", "user-ui"]

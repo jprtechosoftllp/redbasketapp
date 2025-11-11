@@ -195,7 +195,7 @@ services:
   # ---------- NGINX REVERSE PROXY ----------
   nginx:
     image: nginx:alpine
-    container_name: nginx
+    container_name: nginx-proxy
     restart: unless-stopped
     ports:
       - "80:80"

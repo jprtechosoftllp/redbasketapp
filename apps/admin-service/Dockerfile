@@ -2,28 +2,22 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# Enable pnpm
+
 # Copy monorepo-level dependency files
 COPY apps/admin-service/package.json ./
 COPY pnpm-workspace.yaml ./
 COPY pnpm-lock.yaml ./
-COPY tsconfig.json ./
 
 # Copy drizzle config
 COPY drizzle.config.ts ./
 
-# Copy workspace packages that auth-service depends on
-COPY packages/backend ./packages/backend
+# Copy workspace packages that admin-service depends on
+# COPY packages/backend ./packages/backend
 
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --prod
-
-# Ensure drizzle-kit is available
-RUN pnpm add -D drizzle-kit
-
-# Generate and apply Drizzle migrations
-RUN npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
-RUN npx drizzle-kit push --config=drizzle.config.ts || echo "Skipping migration push"
+RUN pnpm install --prod --filter admin-service...
 
 # Copy build application
 COPY apps/admin-service/dist ./dist
@@ -44,6 +38,8 @@ WORKDIR /app
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
+
+# Optional: drizzle.config.ts if needed at runtime
 COPY --from=builder --chown=nodejs:nodejs /app/drizzle.config.ts ./drizzle.config.ts
 
 #Switch to non-root user
