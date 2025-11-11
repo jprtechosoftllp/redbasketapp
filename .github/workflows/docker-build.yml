@@ -145,21 +145,7 @@ jobs:
 
       - name: Setup build environment
         if: steps.check-image.outputs.exists == 'false' || needs.detect-changes
-        run: |
-          # Setup pnpm
-          npm install -g pnpm@@10.18.2
-
-          # Create .npmrc
-          echo "auto-install-peers=ture" > .npmrc
-          echo "shamefully-host=true" >> .npmrc
-          pnpm install --frozen-lockfile
-          pnpm add cookie-parser tslib express
-
-          npx drizzle-kit generate --config=drizzle.config.ts || echo "Skipping migration generation"
-          npx drizzle-kit push --config=drizzle.config.ts || echo "Skipping migration push"
-
-          # Build only services
-          npx nx build ${{ matrix.service }}
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest -f apps/${{ matrix.service }}/Dockerfile .
 
       - name: Build and push Docker image
         if: steps.check-image.outputs.exists == 'false' || needs.detect-changes.outputs.has-backend-changes == 'true'
@@ -213,13 +199,16 @@ jobs:
            else
              echo "exists=false" >> $GITHUB_OUTPUT
            fi
+      - name: Setup build environment
+        if: steps.check-image.outputs.exists == 'false' || needs.detect-changes
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest -f apps/${{ matrix.service }}/Dockerfile .
 
       - name: Build and push Docker image
         if: steps.check-image.outputs.exists == 'false' || needs.detect-changes.outputs.has-frontend-changes == 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: /app/${{ matrix.service }}/Dockerfile
+          file: /apps/${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
