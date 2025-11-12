@@ -9,7 +9,7 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$
 const usernameRegex = /^[a-zA-Z0-9]{3, 30}$/; // Alphanumeric, 3-30 characters
 // const phoneRegex = /^\+?[1-9]\d{1,14}$/;  // E.164 international phone number format
 const phoneRegex = /^[6-9]\d{9}$/; // Indian phone number format
-const otpRegex = /^\d{4}$/  // 4 digit numeric OTP
+const otpRegex = /^\d{6}$/  // 6 digit numeric OTP
 
 
 // Registratoin validation

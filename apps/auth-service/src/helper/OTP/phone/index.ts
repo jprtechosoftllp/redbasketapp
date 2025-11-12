@@ -34,7 +34,7 @@ export const otpRestrictionsPhone = async (phone: Number, next: NextFunction) =>
 
 export const senNumberdOTPPhone = async (phone: Number, next: NextFunction) => {
     try {
-        const otp = crypto.randomInt(1000, 9999).toString();
+        const otp = crypto.randomInt(100000, 999999).toString();
 
         otpRestrictionsPhone(phone, next)
 
