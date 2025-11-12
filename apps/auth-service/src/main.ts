@@ -1,6 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
-// import cors from 'cors';
+import cors from 'cors';
 import dotenv from 'dotenv';
 
 import adminRouter from './routers/admin';
@@ -43,7 +43,7 @@ const app = express();
 //   })
 // );
 
-// app.use(cors());
+app.use(cors());
 
 app.use(express.json());
 app.use(cookieParser());

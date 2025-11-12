@@ -36,7 +36,7 @@ done
 # Start/restart services using docker compose (v2)
 if [ -f docker-compose.production.yaml ]; then
   echo "📦 Deploying services with docker compose..."
-  docker compose -f docker-compose.production.yaml up -d --build --no-deps
+  docker-compose -f docker-compose.production.yaml up -d
 else
   echo "⚠️ docker-compose.production.yaml not found — skipping compose deployment"
 fi

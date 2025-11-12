@@ -91,7 +91,8 @@ const phoneRegex = /^[6-9]\d{9}$/; // Indian phone number format
 // Resend User OTP
 export const sendOTP = async (req: Request, res: Response, next: NextFunction) => {
     try {
-
+       console.log(req.body);
+       
         const { phone } = req.body;
 
         if (!phone) {
@@ -128,7 +129,7 @@ export const userLoginOTP = async (req: Request, res: Response, next: NextFuncti
         loginValidation(req.body);
         
         const { phone, otp } = req.body;
-        verifyOTPPhone(phone, otp, next);
+        verifyOTPPhone(Number(phone), otp, next);
         
         const checkUsers = await postgresDB.select().from(usersSchema).where(eq(usersSchema.phone, phone)).limit(1);
 

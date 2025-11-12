@@ -34,9 +34,7 @@ export const otpRestrictionsPhone = async (phone: Number, next: NextFunction) =>
 
 export const senNumberdOTPPhone = async (phone: Number, next: NextFunction) => {
     try {
-        const otp = crypto.randomInt(100000, 999999).toString();
-
-        otpRestrictionsPhone(phone, next)
+        const otp = crypto.randomInt(10000, 999999).toString();
 
         await redis.set(`otp_cooldown:${phone}`, "true", "EX", 60) // otp send agian after one minute
 
