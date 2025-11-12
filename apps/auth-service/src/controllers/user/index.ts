@@ -128,7 +128,7 @@ export const userLoginOTP = async (req: Request, res: Response, next: NextFuncti
         loginValidation(req.body);
         
         const { phone, otp } = req.body;
-        verifyOTPPhone(Number(phone), otp, next);
+        verifyOTPPhone(phone, otp, next);
         
         const checkUsers = await postgresDB.select().from(usersSchema).where(eq(usersSchema.phone, phone)).limit(1);
 
