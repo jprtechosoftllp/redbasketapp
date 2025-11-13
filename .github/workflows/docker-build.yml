@@ -102,22 +102,21 @@ jobs:
           echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
           echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
-  # Build only chages backend services in perallel
+  # Build only changed backend services in parallel
   build-backend:
-   needs: detect-changes
-   if: needs.detect-changes.outputs.has-backend-changes == 'true'
-   environment: production
-   runs-on: ubuntu-latest
-   strategy:
-     matrix: ${{ fromJson(needs.detect-changes.outputs.backend-matrix)}}
-     fail-fast: false
-    #  max-parallel: 5
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has-backend-change == 'true'  # ✅ fix output name
+    environment: production
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.backend-matrix) }}
+      fail-fast: false
+      # max-parallel: 5
 
-   steps:
-
+    steps:
       - name: Free up disk space
         run: |
-          sudo rm -rf /usr/share/dotent /opt/ghic /usr/local/share/boost
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost
           sudo apt-get clean
           df -h
 
@@ -132,7 +131,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-  
+
       - name: Check if image exists
         id: check-image
         run: |
@@ -143,16 +142,18 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Setup build environment
-        if: steps.check-image.outputs.exists == 'false' || needs.detect-changes
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest -f apps/${{ matrix.service }}/Dockerfile .
+      - name: Build Docker image
+        if: steps.check-image.outputs.exists == 'false'
+        run: |
+           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest \
+            -f apps/${{ matrix.service }}/Dockerfile .
 
-      - name: Build and push Docker image
-        if: steps.check-image.outputs.exists == 'false' || needs.detect-changes.outputs.has-backend-changes == 'true'
+      - name: Push Docker image
+        if: steps.check-image.outputs.exists == 'false'
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: /app/${{ matrix.service }}/Dockerfile
+          file: apps/${{ matrix.service }}/Dockerfile  # ✅ fix path
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest

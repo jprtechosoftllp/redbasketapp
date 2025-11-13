@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import { ValidationError } from "@packages/backend/errors";
 import postgresDB from "@packages/backend/db/postgresSql";
 import usersSchema from "@packages/backend/schema/user";
-import { otpRestrictionsPhone, senNumberdOTPPhone, teackOtpRequestPhone, verifyOTPPhone } from "../../helper/OTP/phone";
+import { otpRestrictionsPhone, sendNumberOTPPhone, teackOtpRequestPhone, verifyOTPPhone } from "../../helper/OTP/phone";
 import storeSetCookies from "../../utils/cookies/store";
 
 // const phoneRegex = /^\+?[1-9]\d{1,14}$/;  // E.164 international phone number format
@@ -91,8 +91,6 @@ const phoneRegex = /^[6-9]\d{9}$/; // Indian phone number format
 // Resend User OTP
 export const sendOTP = async (req: Request, res: Response, next: NextFunction) => {
     try {
-       console.log(req.body);
-       
         const { phone } = req.body;
 
         if (!phone) {
@@ -104,12 +102,12 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
         };
 
         // Check OTP restrictions
-        await otpRestrictionsPhone(phone, next);
+        await otpRestrictionsPhone(Number(phone), next);
         // track OTP request count
-        await teackOtpRequestPhone(phone, next);
+        await teackOtpRequestPhone(Number(phone), next);
 
         // Call function to send OTP
-        await senNumberdOTPPhone(phone, next);
+        await sendNumberOTPPhone(Number(phone), next);
 
         return res.status(200).json({
             message: "OTP resent successfully to the provided phone number."
@@ -129,7 +127,7 @@ export const userLoginOTP = async (req: Request, res: Response, next: NextFuncti
         loginValidation(req.body);
         
         const { phone, otp } = req.body;
-        verifyOTPPhone(Number(phone), otp, next);
+        await verifyOTPPhone(phone, otp, next);
         
         const checkUsers = await postgresDB.select().from(usersSchema).where(eq(usersSchema.phone, phone)).limit(1);
 
@@ -159,6 +157,8 @@ export const userLoginOTP = async (req: Request, res: Response, next: NextFuncti
 
         return res.status(200).json({
             message: "Login successfully.",
+            status: true,
+            access_token: accessToken,
             user: {
                 id: user.id,
                 phoneNumber: user.phone,

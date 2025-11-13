@@ -1,0 +1,20 @@
+import swaggerAutogen from "swagger-autogen";
+import dotenv from 'dotenv';
+dotenv.config()
+
+const docs ={
+    info: {
+        title: "Auth Service API",
+        description: "API documentation for the authentication service.",
+        version: "1.0.0",
+    },
+    host: `https://redbasketapp.hopto.org/auth`, // or your deployed host
+    schemes: ["http", 'https'],
+}
+
+const outputFile = "./swagger-output.json";
+const endpointsFiles = [
+     "apps/auth-service/src/routers/index.ts",
+    ];
+
+swaggerAutogen()(outputFile, endpointsFiles, docs)

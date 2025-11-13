@@ -2,12 +2,10 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
-
-import adminRouter from './routers/admin';
-import managerRouter from './routers/manager';
-import vendorRouter from './routers/vendor';
-import userRouter from './routers/user';
+const swaggerDocs = require('./swagger-output.json');
+import swaggerUi from 'swagger-ui-express'
 import errorMiddleware from '@packages/backend/middlewares/error';
+import router from './routers';
 
 dotenv.config();
 
@@ -57,11 +55,14 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Serve Swagger UI
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.get('/docs-json', (req, res) => {
+    res.send(swaggerDocs);
+});
+
 // Route bindings
-app.use('/admin', adminRouter);
-app.use('/manager', managerRouter);
-app.use('/vendor', vendorRouter);
-app.use('/user', userRouter);
+app.use('/', router);
 
 // Error handling middleware
 app.use(errorMiddleware);

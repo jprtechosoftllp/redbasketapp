@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@meat
 import { toast } from 'sonner';
 
 // Type definitions
-type DigitArray = [string, string, string, string];
+type DigitArray = [string, string, string, string, string, string];
 
 interface FormState {
   digits: DigitArray;
@@ -14,7 +14,7 @@ interface FormState {
 // Custom hook for form logic
 const useVerificationForm = () => {
   const [formState, setFormState] = useState<FormState>({
-    digits: ['', '', '', ''],
+    digits: ['', '', '', '', '', ''],
   });
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -59,7 +59,7 @@ const VerifyForm: React.FC<Props> = ({ timer, canResend, submitMutation, setForm
     updateDigits(newDigits);
 
     // Auto-focus to next input
-    if (value && index < 3) {
+    if (value && index < 6) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -91,7 +91,7 @@ const VerifyForm: React.FC<Props> = ({ timer, canResend, submitMutation, setForm
   };
 
   const fillDigits = (digitString: string): void => {
-    const newDigits: DigitArray = ['', '', '', ''];
+    const newDigits: DigitArray = ['', '', '', '', '', ''];
 
     for (let i = 0; i < Math.min(4, digitString.length); i++) {
       if (isValidDigit(digitString[i])) {
@@ -134,9 +134,9 @@ const VerifyForm: React.FC<Props> = ({ timer, canResend, submitMutation, setForm
   const handleSubmit = async (codeOverride?: string): Promise<void> => {
     const code = codeOverride || digits.join('');
 
-    if (code.length !== 4) {
+    if (code.length !== 6) {
 
-      toast.error('Please enter all 4 digits', {
+      toast.error('Please enter all 6 digits', {
         icon: <UserCheck className="w-6 h-6 mr-3 text-white" />,
         action: {
           label: "Undo",

@@ -4,7 +4,7 @@ import { ValidationError } from "@packages/backend/errors";
 import redis from "@packages/backend/db/redis";
 import axios from 'axios';
 
-export const otpRestrictionsPhone = async (phone: Number, next: NextFunction) => {
+export const otpRestrictionsPhone = async (phone: number, next: NextFunction) => {
     try {
 
         // Check account is lock due to multiple attempts
@@ -32,11 +32,13 @@ export const otpRestrictionsPhone = async (phone: Number, next: NextFunction) =>
     }
 }
 
-export const senNumberdOTPPhone = async (phone: Number, next: NextFunction) => {
+export const sendNumberOTPPhone = async (phone: number, next: NextFunction) => {
     try {
-        const otp = crypto.randomInt(10000, 999999).toString();
+        const otp = crypto.randomInt(100000, 999999).toString();
 
-        await redis.set(`otp_cooldown:${phone}`, "true", "EX", 60) // otp send agian after one minute
+        await redis.set(`otp_cooldown:${phone}`, "true", "EX", 60) // otp send agian after one minut
+
+        await redis.set(`otp:${phone}`, otp, "EX", 300);  // otp valid for 5 minutes
 
         await axios.get("https://www.fast2sms.com/dev/bulkV2", {
             params: {
@@ -51,15 +53,13 @@ export const senNumberdOTPPhone = async (phone: Number, next: NextFunction) => {
             },
         });
 
-        await redis.set(`otp:${phone}`, otp, "EX", 300);  // otp valid for 5 minutes
-
     } catch (error) {
         throw new Error("Error in sending OTP");
         next(error)
     }
 }
 
-export const teackOtpRequestPhone = async (phone: Number, next: NextFunction) => {
+export const teackOtpRequestPhone = async (phone: number, next: NextFunction) => {
     try {
         const otpRequestKey = `otp_request_count:${phone}`;
         let otpRequest = parseInt((await redis.get(otpRequestKey)) || "0");
@@ -78,7 +78,7 @@ export const teackOtpRequestPhone = async (phone: Number, next: NextFunction) =>
     }
 }
 
-export const verifyOTPPhone = async (phone: Number, otp: string, next: NextFunction) => {
+export const verifyOTPPhone = async (phone: number, otp: string, next: NextFunction) => {
     try {
         const storedOtp = await redis.get(`otp:${phone}`);
 
@@ -93,14 +93,14 @@ export const verifyOTPPhone = async (phone: Number, otp: string, next: NextFunct
         const failedAttempts = parseInt((await redis.get(failedOtpKey)) || "0");
 
         if (storedOtp !== otp) {
-            if (failedAttempts >= Number(process.env.OTP_COUNT_LIMIT)) {
+            if (failedAttempts >= Number(process.env.OTP_COUNT_LIMIT_BY_PHONE)) {
                 await redis.set(`otp_lock:${phone}`, "locked", "EX", 1800); // account lock for 30 minutes
                 await redis.del(`otp:${phone}`, failedOtpKey)
                 throw new ValidationError("Too many failed attempts. Your account is locked for 30 minutes");
             }
             await redis.set(failedOtpKey, failedAttempts + 1, "EX", 300)
             throw new ValidationError(
-                `Incorrect OTP. ${Number(process.env.OTP_COUNT_LIMIT) - failedAttempts} attempts left`
+                `Incorrect OTP. ${Number(process.env.OTP_COUNT_LIMIT_BY_PHONE) - failedAttempts} attempts left`
             );
         };
 
