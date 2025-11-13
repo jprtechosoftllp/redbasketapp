@@ -1,10 +1,10 @@
 name: Build & Deploy on AWS
+
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main]
-  
   workflow_dispatch:
     inputs:
       force_rebuild:
@@ -13,11 +13,9 @@ on:
         default: "false"
 
 jobs:
-  # Detect which services have changed
   detect-changes:
     runs-on: ubuntu-latest
     environment: production
-
     outputs:
       backend-matrix: ${{ steps.set-matrix.outputs.backend-matrix }}
       frontend-matrix: ${{ steps.set-matrix.outputs.frontend-matrix }}
@@ -37,33 +35,32 @@ jobs:
         uses: tj-actions/changed-files@v41
         with:
           files_yaml: |
-            admin_service:
-              - apps/admin-service/**
-              - packages/backend/**
             auth_service:
               - apps/auth-service/**
               - packages/backend/**
             product_service:
               - apps/product-service/**
               - packages/backend/**
-            api_gateway:
-              - apps/api_gateway/**
-              - packages/backend/**
             manager_service:
               - apps/manager-service/**
               - packages/backend/**
-            
-            admin_ui:
-              - apps/admin-ui/**
-              - packages/frontend/**
+            admin_service:
+              - apps/admin-service/**
+              - packages/backend/**
+            api_gateway:
+              - apps/api_gateway/**
+              - packages/backend/**
             user_ui:
               - apps/user-ui/**
+              - packages/frontend/**
+            manager_ui:
+              - apps/manager-ui/**
               - packages/frontend/**
             vendor_ui:
               - apps/vendor-ui/**
               - packages/frontend/**
-            manager_ui:
-              - apps/manager-ui/**
+            admin_ui:
+              - apps/admin-ui/**
               - packages/frontend/**
 
       - name: Set matrix for changed services
@@ -72,28 +69,24 @@ jobs:
           BACKEND_SERVICE=()
           FRONTEND_SERVICE=()
 
-          # Force rebuild
           if [[ "${{ github.event.inputs.force_rebuild }}" == "true" ]]; then
-             echo "Force rebuild required - building all services"
-             BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
-             FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
+            BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
+            FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
           else
-            # Shared files
-            if [[ "${{ steps.changed-files.outputs.shared_any_changed }}" == "true" ]]; then
-               echo "Shared files changed - building all services"
-               BACKEND_SERVICE=("auth-service" "product-service" "manager-service" "admin-service" "api-gateway")
-               FRONTEND_SERVICE=("user-ui" "manager-ui" "vendor-ui" "admin-ui")
-            else
-              # Individual service checks go here...
-              if [[ "${{ steps.changed-files.outputs.auth_service_any_changed }}" == "true" ]]; then
-                 BACKEND_SERVICE+=("auth-service")
-              fi
-               # repeat for other services...
-            fi
+            if [[ "${{ steps.changed-files.outputs.auth_service_any_changed }}" == "true" ]]; then BACKEND_SERVICE+=("auth-service"); fi
+            if [[ "${{ steps.changed-files.outputs.product_service_any_changed }}" == "true" ]]; then BACKEND_SERVICE+=("product-service"); fi
+            if [[ "${{ steps.changed-files.outputs.manager_service_any_changed }}" == "true" ]]; then BACKEND_SERVICE+=("manager-service"); fi
+            if [[ "${{ steps.changed-files.outputs.admin_service_any_changed }}" == "true" ]]; then BACKEND_SERVICE+=("admin-service"); fi
+            if [[ "${{ steps.changed-files.outputs.api_gateway_any_changed }}" == "true" ]]; then BACKEND_SERVICE+=("api-gateway"); fi
+
+            if [[ "${{ steps.changed-files.outputs.user_ui_any_changed }}" == "true" ]]; then FRONTEND_SERVICE+=("user-ui"); fi
+            if [[ "${{ steps.changed-files.outputs.manager_ui_any_changed }}" == "true" ]]; then FRONTEND_SERVICE+=("manager-ui"); fi
+            if [[ "${{ steps.changed-files.outputs.vendor_ui_any_changed }}" == "true" ]]; then FRONTEND_SERVICE+=("vendor-ui"); fi
+            if [[ "${{ steps.changed-files.outputs.admin_ui_any_changed }}" == "true" ]]; then FRONTEND_SERVICE+=("admin-ui"); fi
           fi
 
-          BACKEND_MATRIX=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
-          FRONTEND_MATRIX=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({service: .})')
+          BACKEND_MATRIX=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))' | jq -c '{service: .}')
+          FRONTEND_MATRIX=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))' | jq -c '{service: .}')
 
           echo "backend-matrix=$BACKEND_MATRIX" >> $GITHUB_OUTPUT
           echo "frontend-matrix=$FRONTEND_MATRIX" >> $GITHUB_OUTPUT
@@ -102,24 +95,16 @@ jobs:
           echo "changed-backend=$(printf '%s\n' "${BACKEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
           echo "changed-frontend=$(printf '%s\n' "${FRONTEND_SERVICE[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
-  # Build only changed backend services in parallel
   build-backend:
     needs: detect-changes
-    if: needs.detect-changes.outputs.has-backend-change == 'true'  # ✅ fix output name
+    if: needs.detect-changes.outputs.has-backend-change == 'true'
     environment: production
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.detect-changes.outputs.backend-matrix) }}
       fail-fast: false
-      max-parallel: 5
 
     steps:
-      - name: Free up disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost
-          sudo apt-get clean
-          df -h
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -142,18 +127,12 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build Docker image
-        if: steps.check-image.outputs.exists == 'false'
-        run: |
-           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest \
-            -f apps/${{ matrix.service }}/Dockerfile .
-
-      - name: Push Docker image
+      - name: Build and push Docker image
         if: steps.check-image.outputs.exists == 'false'
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: apps/${{ matrix.service }}/Dockerfile  # ✅ fix path
+          file: apps/${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
@@ -161,25 +140,17 @@ jobs:
           build-args: |
             SERVICE_NAME=${{ matrix.service }}
 
-  # Build only changes frontend services in perallel
   build-frontend:
-   needs: detect-changes
-   if: needs.detect-changes.outputs.has-frontend-changes == 'true'
-   environment: production
-   runs-on: ubuntu-latest
-   strategy:
-     matrix: ${{ fromJson(needs.detect-changes.outputs.frontend-matrix)}}
-     fail-fast: false
-    #  max-parallel: 3
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has-frontend-change == 'true'
+    environment: production
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.detect-changes.outputs.frontend-matrix) }}
+      fail-fast: false
 
-   steps:
-      - name: Free up disk space
-        run: |
-          sudo rm -rf /usr/share/dotent /opt/ghic /usr/local/share/boost
-          sudo apt-get clean
-          df -h
-
-      - name: Checkout repository
+    steps:
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
@@ -194,28 +165,26 @@ jobs:
       - name: Check if image exists
         id: check-image
         run: |
-           IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
-           if docker manifest inspect $IMAGE > /dev/null 2>&1; then
-             echo "exists=true" >> $GITHUB_OUTPUT
-           else
-             echo "exists=false" >> $GITHUB_OUTPUT
-           fi
-      - name: Setup build environment
-        if: steps.check-image.outputs.exists == 'false' || needs.detect-changes
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest -f apps/${{ matrix.service }}/Dockerfile .
+          IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
+          if docker manifest inspect $IMAGE > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build and push Docker image
-        if: steps.check-image.outputs.exists == 'false' || needs.detect-changes.outputs.has-frontend-changes == 'true'
+        if: steps.check-image.outputs.exists == 'false'
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: /apps/${{ matrix.service }}/Dockerfile
+          file: apps/${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:buildcache,mode=max
           build-args: |
             SERVICE_NAME=${{ matrix.service }}
+
 
   # 🚀 3. Deploy to EC2
   deploy-to-ec2:
