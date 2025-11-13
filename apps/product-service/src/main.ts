@@ -1,11 +1,13 @@
 import express from 'express';
-// import cors from 'cors';
+import cors from 'cors';
+import { sql } from 'drizzle-orm';
 import cookieParser from 'cookie-parser';
 import errorMiddleware from '@packages/backend/middlewares/error';
 import dotenv from 'dotenv';
 import categoryRouter from './routers/category';
 import subCategoryRouter from './routers/sub-category';
 import productRouter from './routers/product';
+import postgresDB from '@packages/backend/db/postgresSql';
 dotenv.config();
 
 const port = process.env.PRODUCT_SERVICE_PORT ? Number(process.env.PRODUCT_SERVICE_PORT) : 8082;
@@ -37,18 +39,29 @@ const app = express();
 //   })
 // );
 
-// app.use(cors());
+app.use(cors());
 
 app.use(cookieParser());
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    message: 'Product Service is healthy',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-  });
+app.get('/health', async (req, res) => {
+  try {
+    await postgresDB.execute(sql`SELECT 1`);
+    res.status(200).json({
+      message: 'Product Service is healthy',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  } catch (err) {
+    console.error('❌ Product health check failed:', err);
+    res.status(500).json({
+      message: 'Product Service is unhealthy',
+      error: err.message,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  }
 });
 
 app.use('/category', categoryRouter);

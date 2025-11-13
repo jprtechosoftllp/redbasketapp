@@ -7,9 +7,7 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false, // use proper CA cert in production
-  },
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  }
 });
 
 // Optional: catch unexpected pool errors

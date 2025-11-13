@@ -6,6 +6,8 @@ const swaggerDocs = require('./swagger-output.json');
 import swaggerUi from 'swagger-ui-express'
 import errorMiddleware from '@packages/backend/middlewares/error';
 import router from './routers';
+import postgresDB from '@packages/backend/db/postgresSql';
+import { sql } from 'drizzle-orm';
 
 dotenv.config();
 
@@ -46,13 +48,23 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    message: 'Auth Service is healthy',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-  });
+app.get('/health', async (req, res) => {
+  try {
+    await postgresDB.execute(sql`SELECT 1`);
+    res.status(200).json({
+      message: 'Auth Service is healthy',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  } catch (err:any) {
+    console.error('❌ Health check failed:', err);
+    res.status(500).json({
+      message: 'Auth Service is unhealthy',
+      error: err.message,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  }
 });
 
 // Serve Swagger UI

@@ -1,10 +1,12 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
-// import cors from 'cors';
+import cors from 'cors';
 import errorMiddleware from '@packages/backend/middlewares/error';
 import dotenv from 'dotenv';
 import vendorRouter from './routers/vendor';
+import postgresDB from '@packages/backend/db/postgresSql';
 dotenv.config()
+import { sql } from 'drizzle-orm';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const host = isProduction ? '0.0.0.0' : 'localhost';
@@ -35,18 +37,29 @@ const app = express();
 //   })
 // );
 
-// app.use(cors())
+app.use(cors())
 
 app.use(express.json());
 app.use(cookieParser());
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    message: 'Manager Service is healthy',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-  });
+app.get('/health', async (req, res) => {
+  try {
+    await postgresDB.execute(sql`SELECT 1`);
+    res.status(200).json({
+      message: 'Manager Service is healthy',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  } catch (err:any) {
+    console.error('❌ Manager health check failed:', err);
+    res.status(500).json({
+      message: 'Manager Service is unhealthy',
+      error: err.message,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  }
 });
 
 app.use('/vendor', vendorRouter);

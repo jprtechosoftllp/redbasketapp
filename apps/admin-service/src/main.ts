@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import manageRouter from './routers/manager';
 import vendorRouter from './routers/vendors';
 import type { Express } from 'express';
+import { sql } from 'drizzle-orm';
+import postgresDB from '@packages/backend/db/postgresSql';
 
 dotenv.config();
 
@@ -43,12 +45,23 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    message: 'Admin Service is healthy',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-  });
+app.get('/health', async (req, res) => {
+  try {
+    await postgresDB.execute(sql`SELECT 1`);
+    res.status(200).json({
+      message: 'Admin Service is healthy',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  } catch (err:any) {
+    console.error('❌ Admin health check failed:', err);
+    res.status(500).json({
+      message: 'Admin Service is unhealthy',
+      error: err.message,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  }
 });
 
 // Routes
