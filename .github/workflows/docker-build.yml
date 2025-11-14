@@ -139,6 +139,7 @@ jobs:
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:buildcache,mode=max
           build-args: |
             SERVICE_NAME=${{ matrix.service }}
+            NODE_ENV=production
 
   build-frontend:
     needs: detect-changes
