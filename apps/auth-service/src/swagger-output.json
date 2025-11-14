@@ -5,7 +5,7 @@
     "description": "API documentation for the authentication service.",
     "version": "1.0.0"
   },
-  "host": "https://redbasketapp.hopto.org/auth",
+  "host": "redbasketapp.hopto.org/auth",
   "basePath": "/",
   "schemes": [
     "http",
@@ -86,9 +86,38 @@
     "/user/update": {
       "post": {
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                },
+                "username": {
+                  "example": "any"
+                },
+                "default_address": {
+                  "example": "any"
+                },
+                "city": {
+                  "example": "any"
+                },
+                "state": {
+                  "example": "any"
+                },
+                "pinCode": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
           }
         }
       }

@@ -6,7 +6,7 @@ const docs ={
         description: "API documentation for the authentication service.",
         version: "1.0.0",
     },
-    host: `https://redbasketapp.hopto.org/auth`, // or your deployed host
+    host: `redbasketapp.hopto.org/auth`, // or your deployed host
     schemes: ["http", 'https'],
 }
 

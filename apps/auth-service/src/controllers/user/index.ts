@@ -1,6 +1,7 @@
 import { Response, Request, NextFunction } from "express";
 import {
     loginValidation,
+    updateUserValidation,
     // registerValidation
 } from "../../utils/validations/user";
 import { eq } from "drizzle-orm";
@@ -107,10 +108,12 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
         await teackOtpRequestPhone(Number(phone), next);
 
         // Call function to send OTP
-        await sendNumberOTPPhone(Number(phone), next);
+        const otp = await sendNumberOTPPhone(Number(phone), next);
 
         return res.status(200).json({
-            message: "OTP resent successfully to the provided phone number."
+            ststus: true,
+            message: "OTP resent successfully to the provided phone number.",
+            otp
         })
 
     } catch (error) {
@@ -123,12 +126,12 @@ export const sendOTP = async (req: Request, res: Response, next: NextFunction) =
 // User Login with OTP
 export const userLoginOTP = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        
+
         loginValidation(req.body);
-        
+
         const { phone, otp } = req.body;
         await verifyOTPPhone(phone, otp, next);
-        
+
         const checkUsers = await postgresDB.select().from(usersSchema).where(eq(usersSchema.phone, phone)).limit(1);
 
         const checkUser = checkUsers[0];
@@ -193,6 +196,7 @@ export const logOut = async (req: Request, res: Response, next: NextFunction) =>
         })
 
         return res.status(200).json({
+            status: true,
             message: "Logout successfully."
         })
 
@@ -214,6 +218,7 @@ export const getUserProfile = async (req: any, res: Response, next: NextFunction
             return next(new ValidationError("User not found."))
         }
         return res.status(200).json({
+            status: true,
             user: {
                 id: user.id, phone: user.phone, username: user.username,
                 email: user.email, city: user.city,
@@ -231,9 +236,45 @@ export const getUserProfile = async (req: any, res: Response, next: NextFunction
 // Update User Profile
 export const updateUserProfile = async (req: any, res: Response, next: NextFunction) => {
     try {
+        const userId = req.user.id;
+        updateUserValidation(req.body)
+        const { email, username, default_address, city, state, pinCode } = req.body;
+        // Perform the update (do not assume the update returns the updated row)
+        const [user] = await postgresDB.update(usersSchema)
+            .set({
+                username,
+                email,
+                city,
+                state,
+                default_address,
+                pinCode,
+                updatedAt: new Date().toISOString()
+            })
+            .where(eq(usersSchema.id, userId))
+            .returning(); // returns updated row(s)
 
+        if (!user) {
+            return next(new ValidationError("User not found."))
+        }
+
+        return res.status(200).json({
+            message: "User updated successfully.",
+            status: true,
+            user: {
+                id: user.id,
+                phoneNumber: user.phone,
+                username: user.username ?? username,
+                default_address: user.default_address ?? default_address,
+                loyalty_points: user.loyalty_points,
+                wallet_balance: user.wallet_balance,
+                city: user.city ?? city,
+                state: user.state ?? state,
+                pinCode: user.pinCode ?? pinCode
+            }
+        })
     } catch (error) {
-
+        console.log("Error in user updateUserProfile controller:", error);
+        return next(error)
     }
 }
 

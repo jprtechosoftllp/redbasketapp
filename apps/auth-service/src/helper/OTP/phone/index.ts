@@ -2,7 +2,7 @@ import { NextFunction } from "express";
 import crypto from 'crypto';
 import { ValidationError } from "@packages/backend/errors";
 import redis from "@packages/backend/db/redis";
-import axios from 'axios';
+// import axios from 'axios';
 
 export const otpRestrictionsPhone = async (phone: number, next: NextFunction) => {
     try {
@@ -40,18 +40,20 @@ export const sendNumberOTPPhone = async (phone: number, next: NextFunction) => {
 
         await redis.set(`otp:${phone}`, otp, "EX", 300);  // otp valid for 5 minutes
 
-        await axios.get("https://www.fast2sms.com/dev/bulkV2", {
-            params: {
-                authorization: process.env.OTP_FAST2SMS_API_KEY, // use env var for safety
-                route: process.env.OTP_ROUTE,
-                sender_id: process.env.OTP_SENDER_ID,
-                message: process.env.OTP_MESSAGE,
-                variables_values: otp,
-                flash: 0,
-                numbers: phone,
-                schedule_time: '',
-            },
-        });
+        // await axios.get("https://www.fast2sms.com/dev/bulkV2", {
+        //     params: {
+        //         authorization: process.env.OTP_FAST2SMS_API_KEY, // use env var for safety
+        //         route: process.env.OTP_ROUTE,
+        //         sender_id: process.env.OTP_SENDER_ID,
+        //         message: process.env.OTP_MESSAGE,
+        //         variables_values: otp,
+        //         flash: 0,
+        //         numbers: phone,
+        //         schedule_time: '',
+        //     },
+        // });
+
+        return otp;
 
     } catch (error) {
         throw new Error("Error in sending OTP");

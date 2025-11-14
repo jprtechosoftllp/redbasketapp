@@ -10,6 +10,7 @@ const usernameRegex = /^[a-zA-Z0-9]{3, 30}$/; // Alphanumeric, 3-30 characters
 // const phoneRegex = /^\+?[1-9]\d{1,14}$/;  // E.164 international phone number format
 const phoneRegex = /^[6-9]\d{9}$/; // Indian phone number format
 const otpRegex = /^\d{6}$/  // 6 digit numeric OTP
+const pinCodeRegex = /^\d{6}$/
 
 
 // Registratoin validation
@@ -89,3 +90,37 @@ export const forgotPasswordValidation = (data: any)=> {
         throw new ValidationError("Valid OTP is required.")
     }
 }
+
+export const updateUserValidation = (data:any) => {
+  const { email, username, default_address, city, state, pinCode } = data;
+
+  // Email validation
+  if (email && !emailRegex.test(email)) {
+    throw new ValidationError("Invalid email format");
+  }
+
+  // Username validation
+  if (username && (username.length < 3 || username.length > 30)) {
+    throw new ValidationError("Username must be between 3 and 30 characters");
+  }
+
+  // Default address validation
+  if (default_address && default_address.length > 255) {
+    throw new ValidationError("Default address must not exceed 255 characters");
+  }
+
+  // City validation
+  if (city && city.length > 100) {
+    throw new ValidationError("City must not exceed 100 characters");
+  }
+
+  // State validation
+  if (state && state.length > 100) {
+    throw new ValidationError("State must not exceed 100 characters");
+  }
+
+  // PinCode validation (must be 6 digits)
+  if (pinCode && (!pinCodeRegex.test(pinCode))) {
+    throw new ValidationError("PinCode must be exactly 6 digits");
+  }
+};
